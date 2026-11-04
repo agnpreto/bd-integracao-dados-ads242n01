@@ -1,0 +1,1 @@
+-- DDL corrigido para MySQL
