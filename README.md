@@ -8,8 +8,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-
+| Franciane de Carvalho Nogueira | 2418640 | francinogueira0611-ctrl |
 ## O cenário
 
 Você foi contratado para implantar o banco de dados de uma rede de lojas. O cliente enviou:
