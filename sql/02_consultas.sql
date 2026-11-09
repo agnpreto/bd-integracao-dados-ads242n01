@@ -1,3 +1,4 @@
--- 02_consultas
--- Nome:
 
+-- 02_consultas
+-- Nome:Franciane Nogueira
+-- Parte 2: Consulta SQL
