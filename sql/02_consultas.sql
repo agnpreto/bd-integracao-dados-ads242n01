@@ -17,12 +17,26 @@ ORDER BY produto_id;
 -- Consulta 2: Produtos pedidos e ainda não recebidos
 
 SELECT
-    pedido_id,
-    produto_id,
-    descricao_produto,
-    qtde_pedida,
-    qtde_entregue,
-    qtde_pendente
-FROM pedido_compra
-WHERE qtde_pendente > 0
-ORDER BY pedido_id, produto_id;
+    p.pedido_id,
+    p.produto_id,
+    p.descricao_produto,
+    p.qtde_pedida,
+    COALESCE(e.total_recebido, 0) AS qtde_recebida,
+    p.qtde_pedida - COALESCE(e.total_recebido, 0) AS qtde_pendente
+FROM pedido_compra p
+LEFT JOIN (
+    SELECT
+        ordem_compra,
+        produto_id,
+        item,
+        filial_id,
+        SUM(COALESCE(qtde_recebida, 0)) AS total_recebido
+    FROM entradas_mercadoria
+    GROUP BY ordem_compra, produto_id, item, filial_id
+) e
+    ON p.ordem_compra = e.ordem_compra
+    AND p.produto_id = e.produto_id
+    AND p.item = e.item
+    AND p.filial_id = e.filial_id
+WHERE p.qtde_pedida > COALESCE(e.total_recebido, 0)
+ORDER BY p.pedido_id, p.produto_id;
