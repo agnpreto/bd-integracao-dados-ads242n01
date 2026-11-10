@@ -9,8 +9,7 @@ Atividade: Integração de Dados
 O projeto utiliza PostgreSQL como banco de dados principal, MySQL como alternativa e Python para a importação dos dados.
 
 O repositório contém os scripts SQL, o programa de importação e a planilha fornecida para a atividade.
-
-Situação: a execução da importação no banco de dados ainda precisa ser confirmada.
+Situação: Foram realizados testes de consulta no MySQL Workbench, confirmando o acesso às tabelas e a execução das consultas SQL. A conferência completa da importação dos dados ainda está em andamento.
 
 2. Estrutura da planilha
 
