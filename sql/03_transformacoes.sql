@@ -24,6 +24,41 @@ SELECT
 FROM pedido_compra
 GROUP BY produto_id
 HAVING COUNT(*) > 10
-ORDER BY total_requisicoes DESC;-- 03_transformacoes
--- Nome:
+ORDER BY total_requisicoes DESC;-- 03_transformaco-- Nome:
+
+
+
+-- Parte 3: Trigger de fornecedor
+-- Objetivo: gerar automaticamente um identificador
+-- para produtos sem fornecedor cadastrado.
+-- Funcao para atribuir fornecedor automaticamente
+-- Funcao para gerar um novo fornecedor
+
+CREATE OR REPLACE FUNCTION gerar_idfornecedor()
+RETURNS TRIGGER AS $$
+DECLARE
+    novo_id VARCHAR(25);
+BEGIN
+    IF NEW.idfornecedor IS NULL THEN
+        novo_id := 'FORN-' ||
+            SUBSTRING(MD5(gen_random_uuid()::TEXT), 1, 12);
+
+        INSERT INTO fornecedor (idfornecedor, razao_social)
+        VALUES (novo_id, 'Fornecedor pendente de identificacao');
+
+        NEW.idfornecedor := novo_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Gatilho executado antes de inserir um produto
+
+CREATE TRIGGER trg_gerar_idfornecedor
+BEFORE INSERT ON produtos_filial
+FOR EACH ROW
+EXECUTE FUNCTION gerar_idfornecedor();
+
+
 
