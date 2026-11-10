@@ -120,4 +120,16 @@ A validação busca garantir que os dados de fevereiro de 2025 estejam completos
 
 Após a execução das consultas, os resultados deverão ser apresentados ao cliente para conferência, identificação de divergências e aprovação dos dados.
 
+6. Resultados dos testes realizados no MySQL
 
+Foram realizados testes no MySQL Workbench para verificar a quantidade de registros nas tabelas do banco de dados integracao_dados_fran.
+
+Os testes confirmaram:
+
+- fornecedor: 21 registros.
+- produtos_filial: 0 registros.
+- pedido_compra: 0 registros.
+- entradas_mercadoria: consulta executada com sucesso.
+- venda: 33 registros.
+
+As consultas foram executadas, mas ainda é necessário conferir os dados importados e validar sua consistência.
