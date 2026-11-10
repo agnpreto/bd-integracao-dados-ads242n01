@@ -131,21 +131,21 @@ Linhas no banco
 
 fornecedor
 
-A conferir
+21 registros
 
 A conferir
 
 produtos_filial
 
-A conferir
+A conferir(planilha)
 
-A conferir
+A conferir 0 registros (banco)
 
 pedido_compra
 
 A conferir
 
-A conferir
+0 registros(banco)
 
 entradas_mercadoria
 
@@ -157,7 +157,7 @@ venda
 
 A conferir
 
-A conferir
+33 registros
 
 Observação: Os totais não foram preenchidos porque a importação e a contagem dos registros ainda não foram comprovadas por execução no banco.
 
