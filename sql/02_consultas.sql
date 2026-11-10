@@ -12,7 +12,9 @@ FROM venda
 WHERE data_emissao >= '2025-02-01'
   AND data_emissao < '2025-03-01'
 GROUP BY produto_id
-ORDER BY produto_id;-- Consulta 2: Produtos pedidos e ainda não recebidos
+ORDER BY produto_id;
+
+-- Consulta 2: Produtos pedidos e ainda não recebidos
 
 SELECT
     pedido_id,
