@@ -2,7 +2,7 @@
 
 **Disciplina:** Banco de Dados (ADS242N01)  
 **Trabalho:** Em dupla.  
-**Prazo:** dd/mm/aaaa
+**Prazo:** 24/11/2026.
 
 ## Aluno
 
