@@ -4,12 +4,14 @@ from datetime import datetime, timedelta
 
 # ── Configurações ──────────────────────────────────────────
 ARQUIVO = "dados/base_teste.xlsx"  #trocar caminho do dataset dos Senhores
+import os
+
 DB = {
-    "host": "localhost", #de acordo com o host do SGBD dos Senhores
-    "port": 5432,  #porta padrão do PostgreSQL a do MySQL 3006
-    "database": "postgres", #nome da data base do Senhores
-    "user": "postgres",   #utilizador dos senhores 
-    "password": "1234"   #senha do utilizador
+    "host": os.getenv("DB_HOST", "localhost"),
+    "port": int(os.getenv("DB_PORT", 5432)),
+    "database": os.getenv("DB_NAME", "postgres"),
+    "user": os.getenv("DB_USER", "postgres"),
+    "password": os.getenv("DB_PASSWORD", "exemplo")  # NUNCA coloque senha real aqui
 }
 
 # ── Converte serial do Excel para data ─────────────────────
