@@ -1,7 +1,7 @@
 # Integração de Dados: implantação, consultas e validação
 
 **Disciplina:** Banco de Dados (ADS242N01)  
-**Trabalho:** individual  
+**Trabalho:** Em dupla.  
 **Prazo:** dd/mm/aaaa
 
 ## Aluno
