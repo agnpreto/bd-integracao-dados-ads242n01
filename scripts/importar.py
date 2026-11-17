@@ -1,3 +1,13 @@
+# =====================================================================
+# Script de importação da planilha base_teste.xlsx para PostgreSQL
+# Trabalho: Integração de Dados
+# Alunas: Franciane de Carvalho Nogueira e John Erik de Araujo Santos
+#
+# Uso:
+#   export DB_PASSWORD="sua_senha"
+#   python scripts/importar.py
+# =====================================================================
+
 import pandas as pd
 import psycopg2
 from datetime import datetime, timedelta
