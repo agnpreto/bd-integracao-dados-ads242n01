@@ -11,7 +11,7 @@
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
 | André Rhodis dos Santos| 2422804 | andrerhodis |
-| Dhyon Kennedy Dias dos Santos | 2401151  | dhyonkennedy |
+| Dhyon Kennedy Dias dos Santos | 2401115  | dhyonkennedy |
 
 
 ## O cenário
