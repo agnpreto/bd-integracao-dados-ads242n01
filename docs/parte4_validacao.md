@@ -1,65 +1,136 @@
-# Parte 4 — Validação dos dados
+# Parte 4 — Estratégia de Validação com o Cliente
 
-## 1. Objetivo
+## 1. Objetivo da validação
 
-Esta etapa tem como objetivo verificar se os dados importados para o PostgreSQL estão corretos, identificando registros ausentes, campos vazios, duplicidades e possíveis inconsistências.
+A validação tem como objetivo confirmar com o cliente se os dados de vendas de fevereiro de 2025 estão corretos, completos e de acordo com as informações utilizadas pela empresa.
 
-## 2. Quantidade de registros esperada
+## 2. Pontos que serão validados
 
-A planilha `dados/base_teste.xlsx` possui cinco abas, com a seguinte quantidade de registros:
+Durante a reunião, serão conferidos:
 
-| Tabela | Registros esperados |
-|---|---:|
-| fornecedor | 20 |
-| produtos_filial | 20 |
-| pedido_compra | 29 |
-| entradas_mercadoria | 20 |
-| venda | 33 |
-| **Total** | **122** |
-
-A quantidade efetivamente importada deve ser conferida com consultas `COUNT(*)` em cada tabela.
-
-## 3. Consultas de validação
-
-As consultas estão disponíveis no arquivo `sql/04_validacao.sql`.
-
-Foram previstas verificações para:
-
-- Quantidade total de registros em cada tabela.
+- Quantidade total de vendas realizadas em fevereiro de 2025.
+- Quantidade de produtos vendidos.
+- Valor total das vendas em reais.
+- Vendas separadas por produto e filial.
+- Existência de registros duplicados.
 - Campos obrigatórios sem preenchimento.
-- Registros duplicados conforme as chaves primárias.
-- Quantidades e valores zerados ou negativos.
-- Datas fora do período esperado.
-- Quantidades fracionadas na unidade de medida `UN`.
-- Resumo das inconsistências encontradas.
+- Datas, quantidades e valores inconsistentes.
+- Diferenças entre os dados da planilha original e os dados armazenados no banco.
 
-## 4. Resultados do teste anterior da tabela venda
+## 3. Técnicas utilizadas
 
-Em um teste anterior, realizado somente com os 33 registros da tabela `venda`, foram encontrados:
+Para garantir a exatidão e a precisão dos dados, serão utilizadas:
 
-| Verificação | Resultado |
-|---|---:|
-| Registros analisados | 33 |
-| Campos obrigatórios vazios | 0 |
-| Grupos de registros duplicados | 0 |
-| Quantidades ou valores não positivos | 0 |
-| Registros com datas fora de 2025 | 0 |
-| Quantidades fracionadas em unidade `UN` | 5 |
+- **Conferência de totais:** comparar a quantidade de registros e os valores da planilha com os resultados do banco.
+- **Verificação de duplicidade:** identificar vendas repetidas.
+- **Verificação de campos vazios:** localizar informações obrigatórias não preenchidas.
+- **Conferência de datas:** garantir que os registros estejam dentro do período analisado.
+- **Conferência de valores:** comparar quantidades e valores unitários com o total calculado.
+- **Agrupamento por produto e filial:** facilitar a comparação dos resultados com os controles do cliente.
 
-As cinco quantidades fracionadas foram mantidas como ocorrências para análise, pois precisam ser avaliadas conforme as regras do negócio.
+## 4. Consultas SQL utilizadas na reunião
 
-Na análise das vendas de fevereiro de 2025, foram encontrados:
+### 4.1. Total de vendas em fevereiro de 2025
+
+```sql
+SELECT
+    COUNT(*) AS quantidade_vendas,
+    SUM(qtde_vendida) AS quantidade_total,
+    SUM(qtde_vendida * valor_unitario) AS valor_total
+FROM venda
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01';
+```
+
+### 4.2. Consumo por produto
+
+```sql
+SELECT
+    produto_id,
+    SUM(qtde_vendida) AS quantidade_vendida,
+    SUM(qtde_vendida * valor_unitario) AS valor_total
+FROM venda
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01'
+GROUP BY produto_id
+ORDER BY produto_id;
+```
+
+### 4.3. Vendas por filial
+
+```sql
+SELECT
+    filial_id,
+    COUNT(*) AS quantidade_vendas,
+    SUM(qtde_vendida * valor_unitario) AS valor_total
+FROM venda
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01'
+GROUP BY filial_id
+ORDER BY filial_id;
+```
+
+### 4.4. Verificação de registros duplicados
+
+```sql
+SELECT
+    filial_id,
+    venda_id,
+    data_emissao,
+    produto_id,
+    item,
+    horariomov,
+    COUNT(*) AS ocorrencias
+FROM venda
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01'
+GROUP BY
+    filial_id,
+    venda_id,
+    data_emissao,
+    produto_id,
+    item,
+    horariomov
+HAVING COUNT(*) > 1;
+```
+
+### 4.5. Verificação de campos obrigatórios vazios
+
+```sql
+SELECT COUNT(*) AS registros_com_problemas
+FROM venda
+WHERE data_emissao IS NULL
+   OR venda_id IS NULL
+   OR produto_id IS NULL
+   OR filial_id IS NULL;
+```
+
+## 5. Resultados do teste anterior
+
+Em um teste anterior, realizado com os 33 registros da tabela `venda`, foram encontrados os seguintes resultados:
 
 | Indicador | Resultado |
 |---|---:|
-| Quantidade de vendas | 14 |
-| Quantidade total vendida | 173,22 |
-| Valor total | R$ 14.093,17 |
+| Registros analisados | 33 |
+| Vendas em fevereiro de 2025 | 14 |
+| Quantidade vendida em fevereiro | 173,22 |
+| Valor total em fevereiro | R$ 14.093,17 |
+| Campos obrigatórios vazios | 0 |
+| Duplicidades encontradas | 0 |
+| Quantidades ou valores não positivos | 0 |
+| Datas fora de 2025 | 0 |
+| Quantidades fracionadas em unidade `UN` | 5 |
 
-Esses resultados correspondem apenas ao teste anterior da tabela `venda`, não à validação completa das cinco tabelas.
+As cinco quantidades fracionadas foram identificadas para análise com o cliente. Elas não foram consideradas erros automaticamente, pois dependem das regras comerciais da empresa.
 
-## 5. Conclusão
+Esses resultados representam somente o teste anterior da tabela `venda`. A validação definitiva deverá ser realizada após a importação completa das cinco tabelas.
 
-As consultas de validação permitem conferir a integridade dos dados e identificar possíveis problemas após a importação.
+## 6. Apresentação ao cliente
 
-A validação completa do projeto depende da execução do importador e da conferência dos 122 registros esperados nas cinco tabelas. Os resultados definitivos devem ser registrados após essa conferência.
+Na reunião, os resultados serão apresentados de forma simples, mostrando os totais de vendas, os produtos mais vendidos e os valores por filial.
+
+Caso sejam encontradas diferenças, elas serão registradas e comparadas com a planilha original. Nenhuma correção será realizada sem verificar sua origem.
+
+## 7. Conclusão
+
+A estratégia permite verificar a confiabilidade das informações antes de sua utilização pela empresa. A aprovação final dependerá da conferência dos resultados com o cliente e da resolução das divergências identificadas.
