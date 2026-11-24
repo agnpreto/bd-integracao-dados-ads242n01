@@ -37,7 +37,7 @@ CREATE TABLE pedido_compra (
     qtde_entregue DOUBLE DEFAULT 0 NOT NULL,
     qtde_pendente DOUBLE DEFAULT 0 NOT NULL,
     preco_compra DOUBLE DEFAULT 0 NULL,
-    fornecedor_id INT DEFAULT 0 NULL,
+    fornecedor_id VARCHAR(25) NULL,
     CONSTRAINT pedido_compra_pkey PRIMARY KEY (
         pedido_id, produto_id, item
     )
@@ -68,7 +68,7 @@ CREATE TABLE produtos_filial (
     preco_unitario DOUBLE DEFAULT 0 NOT NULL,
     preco_compra DOUBLE DEFAULT 0 NOT NULL,
     preco_venda DOUBLE DEFAULT 0 NOT NULL,
-    idfornecedor INT NULL,
+    idfornecedor VARCHAR(25) NULL,
     CONSTRAINT produtos_filial_pkey PRIMARY KEY (
         filial_id, produto_id
     )

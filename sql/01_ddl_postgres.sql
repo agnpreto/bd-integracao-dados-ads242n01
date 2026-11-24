@@ -32,7 +32,7 @@ CREATE TABLE public.pedido_compra (
     qtde_entregue float8 DEFAULT 0 NOT NULL,
     qtde_pendente float8 DEFAULT 0 NOT NULL,
     preco_compra float8 DEFAULT 0 NULL,
-    fornecedor_id int4 DEFAULT 0 NULL,
+    fornecedor_id varchar(25) NULL,
     CONSTRAINT pedido_compra_pkey PRIMARY KEY (
         pedido_id, produto_id, item
     )
@@ -63,7 +63,7 @@ CREATE TABLE public.produtos_filial (
     preco_unitario float8 DEFAULT 0 NOT NULL,
     preco_compra float8 DEFAULT 0 NOT NULL,
     preco_venda float8 DEFAULT 0 NOT NULL,
-    idfornecedor int4 NULL,
+    idfornecedor varchar(25) NULL,
     CONSTRAINT produtos_filial_pkey PRIMARY KEY (
         filial_id, produto_id
     )
