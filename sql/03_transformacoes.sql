@@ -1,13 +1,19 @@
--- Parte 3: Transformacoes SQL
--- Aluna: Franciane Nogueira
 
--- Consulta 1: Juntar codigo e descricao do produto
+-- =====================================================
+-- PARTE 3 - TRANSFORMACOES SQL
+-- Projeto: Integracao de Dados - ADS242N01
+-- Responsavel: Franciane Nogueira
+-- Banco de dados: PostgreSQL
+-- =====================================================
+
+-- 1. Concatenar codigo e descricao do produto
 
 SELECT
     CONCAT(produto_id, ' - ', descricao_produto) AS produto
 FROM pedido_compra;
 
--- Consulta 2: Formatar datas no padrao brasileiro
+
+-- 2. Formatar datas no padrao brasileiro
 
 SELECT
     produto_id,
@@ -15,8 +21,8 @@ SELECT
     TO_CHAR(data_pedido, 'DD/MM/YYYY') AS data_solicitacao
 FROM pedido_compra;
 
--- Interpretacao: mais de 10 registros de pedidos
--- para o mesmo produto.
+
+-- 3. Identificar produtos com mais de 10 requisicoes
 
 SELECT
     produto_id,
@@ -24,15 +30,14 @@ SELECT
 FROM pedido_compra
 GROUP BY produto_id
 HAVING COUNT(*) > 10
-ORDER BY total_requisicoes DESC;-- 03_transformaco-- Nome:
+ORDER BY total_requisicoes DESC;
 
 
-
--- Parte 3: Trigger de fornecedor
--- Objetivo: gerar automaticamente um identificador
--- para produtos sem fornecedor cadastrado.
--- Funcao para atribuir fornecedor automaticamente
--- Funcao para gerar um novo fornecedor
+-- =====================================================
+-- 4. TRIGGER PARA CADASTRO AUTOMATICO DE FORNECEDOR
+-- Objetivo: gerar fornecedor quando o produto nao
+-- possuir um fornecedor informado.
+-- =====================================================
 
 CREATE OR REPLACE FUNCTION gerar_idfornecedor()
 RETURNS TRIGGER AS $$
@@ -40,20 +45,32 @@ DECLARE
     novo_id VARCHAR(25);
 BEGIN
     IF NEW.idfornecedor IS NULL THEN
+
         novo_id := 'FORN-' ||
             SUBSTRING(MD5(gen_random_uuid()::TEXT), 1, 12);
 
-        INSERT INTO fornecedor (idfornecedor, razao_social)
-        VALUES (novo_id, 'Fornecedor pendente de identificacao');
+        INSERT INTO fornecedor (
+            idfornecedor,
+            razao_social
+        )
+        VALUES (
+            novo_id,
+            'Fornecedor pendente de identificacao'
+        );
 
         NEW.idfornecedor := novo_id;
+
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- Gatilho executado antes de inserir um produto
+
+-- Evita duplicidade do gatilho ao executar novamente
+
+DROP TRIGGER IF EXISTS trg_gerar_idfornecedor
+ON produtos_filial;
 
 CREATE TRIGGER trg_gerar_idfornecedor
 BEFORE INSERT ON produtos_filial
@@ -61,4 +78,4 @@ FOR EACH ROW
 EXECUTE FUNCTION gerar_idfornecedor();
 
 
-
+-- FIM DA PARTE 3
