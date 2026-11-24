@@ -14,8 +14,6 @@
 | --- | --- | --- |
 | Franciane de Carvalho Nogueira | 2418640 | francinogueira0611-ctrl |
 | John Erik de Araujo Santos | 2422168 | jaserik |
-|  |  |  |
-|  |  |  |
 
 ## O cenário
 
