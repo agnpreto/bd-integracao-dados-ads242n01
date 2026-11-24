@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-Preparar a estrutura do banco de dados e realizar a importação dos dados disponibilizados para teste.
+Preparar a estrutura do banco de dados e realizar a importação dos dados disponibilizados para teste, conferindo a quantidade de registros entre a fonte original e o PostgreSQL.
 
 ## 2. Fonte dos dados
 
@@ -32,13 +32,13 @@ Nenhum registro fictício foi criado para simular uma importação completa.
 
 | Tabela | Registros na planilha | Registros no PostgreSQL | Situação |
 |---|---:|---:|---|
-| venda | 33 | A confirmar | Dados disponíveis |
-| fornecedor | Aba ausente | A confirmar | Fonte indisponível |
-| produtos_filial | Aba ausente | A confirmar | Fonte indisponível |
-| pedido_compra | Aba ausente | A confirmar | Fonte indisponível |
-| entradas_mercadoria | Aba ausente | A confirmar | Fonte indisponível |
+| venda | 33 | 33 | Importação conferida |
+| fornecedor | Aba ausente | 0 | Fonte indisponível |
+| produtos_filial | Aba ausente | 0 | Fonte indisponível |
+| pedido_compra | Aba ausente | 0 | Fonte indisponível |
+| entradas_mercadoria | Aba ausente | 0 | Fonte indisponível |
 
-A quantidade efetivamente importada deverá ser confirmada por consultas `SELECT COUNT(*)` no PostgreSQL. Os valores serão preenchidos após a execução do banco.
+A conferência foi realizada por consultas `SELECT COUNT(*)` no PostgreSQL. Os resultados confirmaram a importação dos 33 registros da tabela `venda`. As outras quatro tabelas foram criadas, mas permaneceram vazias devido à ausência das respectivas abas na planilha.
 
 ## 5. Conferência das vendas de fevereiro de 2025
 
@@ -47,20 +47,18 @@ Na aba `venda`, foram identificados 14 registros referentes a fevereiro de 2025.
 - Quantidade vendida: 173,22.
 - Valor total: R$ 14.093,17.
 
-Esses valores foram calculados a partir dos dados disponibilizados na planilha.
+Esses valores foram calculados a partir dos dados disponibilizados na planilha e conferidos por consulta SQL no PostgreSQL.
 
 ## 6. Procedimento de importação
 
-O script `scripts/importar.py` foi preparado para:
+A implantação foi realizada no PostgreSQL, utilizando os seguintes procedimentos:
 
-- verificar a existência do arquivo Excel;
-- identificar as abas disponíveis;
-- informar quando uma aba estiver ausente;
-- validar as colunas obrigatórias da tabela `venda`;
-- utilizar variáveis de ambiente para as configurações de conexão;
-- importar os registros disponíveis para o PostgreSQL.
+- criação das cinco tabelas por meio do script DDL;
+- identificação das tabelas criadas no banco;
+- inserção dos 33 registros disponíveis na tabela `venda`, por meio de comandos SQL `INSERT`;
+- conferência da quantidade de registros por meio de consultas `SELECT COUNT(*)`.
 
-A execução deverá ser conferida por consultas de contagem de registros no banco de dados.
+A execução confirmou a inserção de 33 registros na tabela `venda`, sem registros nas quatro tabelas cujas abas estavam ausentes.
 
 ## 7. Conclusão
 
@@ -68,4 +66,4 @@ A base recebida permite trabalhar com os dados de vendas, mas não permite compr
 
 A ausência das demais abas foi documentada como limitação da fonte de dados, preservando a integridade das informações e sem criação de registros fictícios.
 
-A comparação final entre os registros da planilha e os registros do PostgreSQL será concluída após a execução e conferência da importação.
+A importação da tabela `venda` foi concluída e conferida no PostgreSQL, com correspondência de 33 registros entre a planilha e o banco de dados.
