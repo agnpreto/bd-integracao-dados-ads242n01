@@ -89,3 +89,15 @@ sql/04_validacao.sql                Parte 4
 ⚠️ Não edite o repositório do professor, só o seu fork.
 
 
+## Observação sobre a base recebida
+
+Durante a execução, foi disponibilizada uma base de teste contendo somente a aba `venda`, com 33 registros.
+
+As demais abas previstas no enunciado (`fornecedor`, `produtos_filial`, `pedido_compra` e `entradas_mercadoria`) não estavam presentes na base recebida.
+
+Por esse motivo, as consultas que dependem dessas tabelas foram preparadas conforme a estrutura do banco, mas sua validação com dados reais depende do fornecimento das respectivas informações.
+
+Nenhum registro fictício foi criado para simular uma importação completa.
+
+
+
