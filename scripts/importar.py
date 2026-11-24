@@ -1,9 +1,10 @@
 """
 Importação de dados da planilha dados/base_teste.xlsx para PostgreSQL 18.
 
-- Lê as 5 abas (venda, pedido_compra, entradas_mercadoria, produtos_filial, fornecedor)
+- Lê as 5 abas (fornecedor, produtos_filial, pedido_compra,
+  entradas_mercadoria, venda)
 - Trata datas, horários, vírgula decimal, colunas extras e duplicidades
-- Converte fornecedor_id numérico (1-20) para o formato F1-F20 de fornecedor
+- Converte fornecedor_id numérico (1-20) para o formato F1-F20
 - Executa em transação única com COMMIT/ROLLBACK
 - Credenciais via variáveis de ambiente
 """
@@ -63,9 +64,6 @@ def _num_to_f(v):
         return s
 
 
-# --------------------------------------------------------------
-# Importadores por tabela
-# --------------------------------------------------------------
 def importar_fornecedor(cur, df):
     df = df.reindex(columns=["idfornecedor", "razao_social"])
     df["idfornecedor"] = df["idfornecedor"].astype(str)
