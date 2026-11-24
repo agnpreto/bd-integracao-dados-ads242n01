@@ -1,3 +1,4 @@
+"""
 importar.py - importa dados/base_teste.xlsx para o PostgreSQL (versao corrigida).
 
 Uso:
