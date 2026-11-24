@@ -1,8 +1,12 @@
+AGENTS.md
+PROGRESSO.md
+BRIEFING.md
+.opencode/
 __pycache__/
 *.pyc
+.env
 .venv/
 venv/
-.env
 .vscode/
 .idea/
 .DS_Store

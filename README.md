@@ -10,7 +10,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
+| Kauan Ferreira dos Santos | 2422557 | KauanSntz |
 |  |  |  |
 
 ## O cenário
