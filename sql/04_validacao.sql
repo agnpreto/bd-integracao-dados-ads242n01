@@ -1,112 +1,73 @@
 
--- Parte 4: Validacao dos dados
--- Aluna: Franciane de Carvalho Nogueira
--- Periodo: fevereiro de 2025
+-- PARTE 4 - VALIDACAO DOS DADOS
+-- Base recebida: 33 registros na tabela venda.
 
--- 1. Conferir quantidade de registros por tabela
-SELECT 'fornecedor' AS tabela, COUNT(*) AS total
-FROM fornecedor
-UNION ALL
-SELECT 'produtos_filial', COUNT(*) FROM produtos_filial
-UNION ALL
-SELECT 'pedido_compra', COUNT(*) FROM pedido_compra
-UNION ALL
-SELECT 'entradas_mercadoria', COUNT(*) FROM entradas_mercadoria
-UNION ALL
-SELECT 'venda', COUNT(*) FROM venda;
+-- 1. Conferir quantidade total de registros.
+SELECT COUNT(*) AS total_registros
+FROM venda;
 
--- 2. Total vendido por produto em fevereiro
+-- 2. Identificar campos obrigatorios vazios.
+SELECT *
+FROM venda
+WHERE venda_id IS NULL
+   OR data_emissao IS NULL
+   OR produto_id IS NULL
+   OR qtde_vendida IS NULL
+   OR valor_unitario IS NULL
+   OR filial_id IS NULL;
+
+-- 3. Identificar identificadores de venda duplicados.
+SELECT venda_id, COUNT(*) AS quantidade
+FROM venda
+GROUP BY venda_id
+HAVING COUNT(*) > 1;
+
+-- 4. Identificar quantidades ou valores negativos ou zerados.
+SELECT *
+FROM venda
+WHERE qtde_vendida <= 0
+   OR valor_unitario <= 0;
+
+-- 5. Identificar quantidades fracionadas para unidade UN.
+SELECT *
+FROM venda
+WHERE unidade_medida = 'UN'
+  AND qtde_vendida <> TRUNC(qtde_vendida);
+
+-- 6. Conferir vendas fora do ano de 2025.
+SELECT *
+FROM venda
+WHERE data_emissao < DATE '2025-01-01'
+   OR data_emissao >= DATE '2026-01-01';
+
+-- 7. Conferir vendas de fevereiro de 2025.
 SELECT
     produto_id,
-    SUM(qtde_vendida) AS quantidade_total,
-    SUM(qtde_vendida * valor_unitario) AS valor_total
+    SUM(qtde_vendida) AS quantidade_vendida,
+    ROUND(SUM(qtde_vendida * valor_unitario), 2) AS valor_total
 FROM venda
-WHERE data_emissao >= '2025-02-01'
-  AND data_emissao < '2025-03-01'
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01'
 GROUP BY produto_id
 ORDER BY produto_id;
 
--- 3. Vendas com quantidades ou valores invalidos
-SELECT *
-FROM venda
-WHERE data_emissao >= '2025-02-01'
-  AND data_emissao < '2025-03-01'
-  AND (
-      qtde_vendida IS NULL
-      OR qtde_vendida <= 0
-      OR valor_unitario < 0
-  );
-
--- 4. Pedidos com quantidades inconsistentes
-SELECT *
-FROM pedido_compra
-WHERE data_pedido >= '2025-02-01'
-  AND data_pedido < '2025-03-01'
-  AND (
-      qtde_pedida IS NULL
-      OR qtde_pedida < 0
-      OR qtde_entregue < 0
-      OR qtde_entregue > qtde_pedida
-      OR ABS(qtde_pendente -
-          (qtde_pedida - qtde_entregue)) > 0.0001
-  );
-
--- 5. Entradas sem pedido correspondente
-SELECT e.*
-FROM entradas_mercadoria e
-WHERE e.data_entrada >= '2025-02-01'
-  AND e.data_entrada < '2025-03-01'
-  AND NOT EXISTS (
-      SELECT 1
-      FROM pedido_compra p
-      WHERE p.ordem_compra = e.ordem_compra
-        AND p.produto_id = e.produto_id
-  );
-
--- 6. Produtos com fornecedor inexistente
-SELECT pf.*
-FROM produtos_filial pf
-LEFT JOIN fornecedor f
-    ON pf.idfornecedor = f.idfornecedor
-WHERE pf.idfornecedor IS NOT NULL
-  AND f.idfornecedor IS NULL;
-
--- 7. Produtos vendidos sem cadastro na filial
-SELECT DISTINCT
-    v.filial_id,
-    v.produto_id
-FROM venda v
-LEFT JOIN produtos_filial pf
-    ON v.filial_id = pf.filial_id
-   AND v.produto_id = pf.produto_id
-WHERE v.data_emissao >= '2025-02-01'
-  AND v.data_emissao < '2025-03-01'
-  AND pf.produto_id IS NULL;
-
--- 8. Possiveis pedidos duplicados
+-- 8. Conferir total geral de fevereiro de 2025.
 SELECT
-    ordem_compra,
-    produto_id,
-    item,
-    COUNT(*) AS repeticoes
-FROM pedido_compra
-GROUP BY ordem_compra, produto_id, item
-HAVING COUNT(*) > 1;
+    COUNT(*) AS quantidade_vendas,
+    SUM(qtde_vendida) AS quantidade_total,
+    ROUND(SUM(qtde_vendida * valor_unitario), 2) AS valor_total
+FROM venda
+WHERE data_emissao >= DATE '2025-02-01'
+  AND data_emissao < DATE '2025-03-01';
 
--- 9. Datas de entrega anteriores ao pedido
-SELECT *
-FROM pedido_compra
-WHERE data_pedido >= '2025-02-01'
-  AND data_pedido < '2025-03-01'
-  AND data_entrega < data_pedido;
+-- 9. Conferir os registros por filial.
+SELECT filial_id, COUNT(*) AS total_vendas
+FROM venda
+GROUP BY filial_id
+ORDER BY filial_id;
 
--- 10. Recebimentos com quantidades invalidas
-SELECT *
-FROM entradas_mercadoria
-WHERE data_entrada >= '2025-02-01'
-  AND data_entrada < '2025-03-01'
-  AND (
-      qtde_recebida IS NULL
-      OR qtde_recebida <= 0
-  );
-
+-- 10. Conferir unidades de medida utilizadas.
+SELECT unidade_medida, COUNT(*) AS total
+FROM venda
+GROUP BY unidade_medida
+ORDER BY unidade_medida;
