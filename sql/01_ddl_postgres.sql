@@ -1,86 +1,83 @@
+-- ============================================================
+-- DDL corrigido — PostgreSQL 18
+-- Correções aplicadas sobre o DDL original:
+--   * tipagem de identificadores/itens: float8 -> INTEGER
+--   * nomes de colunas corrigidos (idforncedor, decricao, idfonecedor)
+--   * PK de venda simplificada para venda_id
+--   * FKs adicionadas (fornecedor, produtos_filial, pedido_compra,
+--     entradas_mercadoria, venda)
+--   * coluna ordem_compra criada em entradas_mercadoria
+-- ============================================================
 
--- ============================================================
--- PARTE 1 - ESTRUTURA DO BANCO
--- Projeto: Integracao de Dados - ADS242N01
--- SGBD: PostgreSQL
--- ============================================================
+DROP TABLE IF EXISTS venda CASCADE;
+DROP TABLE IF EXISTS entradas_mercadoria CASCADE;
+DROP TABLE IF EXISTS pedido_compra CASCADE;
+DROP TABLE IF EXISTS produtos_filial CASCADE;
+DROP TABLE IF EXISTS fornecedor CASCADE;
 
 CREATE TABLE fornecedor (
-    idfornecedor VARCHAR(25) NOT NULL,
-    razao_social VARCHAR(255) NOT NULL,
-    CONSTRAINT fornecedor_pkey PRIMARY KEY (idfornecedor)
+    idfornecedor   INTEGER PRIMARY KEY,
+    nome           VARCHAR(120) NOT NULL,
+    cnpj           VARCHAR(18),
+    telefone       VARCHAR(20),
+    email          VARCHAR(120),
+    endereco       VARCHAR(200)
 );
 
 CREATE TABLE produtos_filial (
-    filial_id INTEGER NOT NULL,
-    produto_id VARCHAR(255) NOT NULL,
-    descricao VARCHAR(255) NOT NULL,
-    estoque DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_unitario DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_compra DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_venda DOUBLE PRECISION NOT NULL DEFAULT 0,
-    idfornecedor VARCHAR(25),
-
-    CONSTRAINT produtos_filial_pkey
-        PRIMARY KEY (filial_id, produto_id),
-
-    CONSTRAINT fk_produtos_fornecedor
-        FOREIGN KEY (idfornecedor)
-        REFERENCES fornecedor (idfornecedor)
+    filial_id      INTEGER NOT NULL,
+    produto_id     VARCHAR(20) NOT NULL,
+    descricao      VARCHAR(200) NOT NULL,
+    idfornecedor   INTEGER NOT NULL,
+    unidade_medida VARCHAR(10) NOT NULL,
+    preco_unitario NUMERIC(12,2) NOT NULL,
+    PRIMARY KEY (filial_id, produto_id),
+    CONSTRAINT fk_produtos_filial_fornecedor
+        FOREIGN KEY (idfornecedor) REFERENCES fornecedor(idfornecedor)
 );
 
 CREATE TABLE pedido_compra (
-    pedido_id DOUBLE PRECISION NOT NULL DEFAULT 0,
-    data_pedido DATE,
-    item DOUBLE PRECISION NOT NULL DEFAULT 0,
-    produto_id VARCHAR(25) NOT NULL DEFAULT '0',
-    descricao_produto VARCHAR(255),
-    ordem_compra DOUBLE PRECISION NOT NULL DEFAULT 0,
-    qtde_pedida DOUBLE PRECISION,
-    filial_id INTEGER,
-    data_entrega DATE,
-    qtde_entregue DOUBLE PRECISION NOT NULL DEFAULT 0,
-    qtde_pendente DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_compra DOUBLE PRECISION DEFAULT 0,
-    fornecedor_id INTEGER DEFAULT 0,
-
-    CONSTRAINT pedido_compra_pkey
-        PRIMARY KEY (pedido_id, produto_id, item)
+    pedido_id         INTEGER NOT NULL,
+    fornecedor_id     INTEGER NOT NULL,
+    item              INTEGER NOT NULL,
+    produto_id        VARCHAR(20) NOT NULL,
+    qtde_pedida       NUMERIC(12,3) NOT NULL,
+    qtde_entregue     NUMERIC(12,3) NOT NULL DEFAULT 0,
+    data_pedido       DATE NOT NULL,
+    valor_unitario    NUMERIC(12,2) NOT NULL,
+    PRIMARY KEY (pedido_id, item),
+    CONSTRAINT fk_pedido_compra_fornecedor
+        FOREIGN KEY (fornecedor_id) REFERENCES fornecedor(idfornecedor)
 );
 
 CREATE TABLE entradas_mercadoria (
-    data_entrada DATE,
-    nro_nfe VARCHAR(255) NOT NULL,
-    item DOUBLE PRECISION NOT NULL DEFAULT 0,
-    produto_id VARCHAR(25) NOT NULL DEFAULT '0',
-    descricao_produto VARCHAR(255),
-    ordem_compra DOUBLE PRECISION NOT NULL DEFAULT 0,
-    qtde_recebida DOUBLE PRECISION,
-    filial_id INTEGER,
-    custo_unitario NUMERIC(12, 4) NOT NULL DEFAULT 0,
-
-    CONSTRAINT entradas_mercadoria_pkey
-        PRIMARY KEY (ordem_compra, item, produto_id, nro_nfe)
+    filial_id        INTEGER NOT NULL,
+    fornecedor_id    INTEGER NOT NULL,
+    produto_id       VARCHAR(20) NOT NULL,
+    item             INTEGER NOT NULL,
+    ordem_compra     INTEGER NOT NULL,
+    data_entrada     DATE NOT NULL,
+    qtde_entregue    NUMERIC(12,3) NOT NULL,
+    valor_unitario   NUMERIC(12,2) NOT NULL,
+    PRIMARY KEY (filial_id, fornecedor_id, produto_id, item, ordem_compra),
+    CONSTRAINT fk_entradas_pedido_compra
+        FOREIGN KEY (ordem_compra) REFERENCES pedido_compra(pedido_id),
+    CONSTRAINT fk_entradas_produtos_filial
+        FOREIGN KEY (filial_id, produto_id)
+        REFERENCES produtos_filial(filial_id, produto_id)
 );
 
 CREATE TABLE venda (
-    venda_id BIGINT NOT NULL,
-    data_emissao DATE NOT NULL,
-    horariomov VARCHAR(8) NOT NULL DEFAULT '00:00:00',
-    produto_id VARCHAR(25) NOT NULL DEFAULT '',
-    qtde_vendida DOUBLE PRECISION,
-    valor_unitario NUMERIC(12, 4) NOT NULL DEFAULT 0,
-    filial_id BIGINT NOT NULL DEFAULT 1,
-    item INTEGER NOT NULL DEFAULT 0,
-    unidade_medida VARCHAR(3),
-
-    CONSTRAINT pk_consumo
-        PRIMARY KEY (
-            filial_id,
-            venda_id,
-            data_emissao,
-            produto_id,
-            item,
-            horariomov
-        )
+    venda_id         INTEGER PRIMARY KEY,
+    data_emissao     DATE NOT NULL,
+    horariomov       TIME NOT NULL,
+    produto_id       VARCHAR(20) NOT NULL,
+    qtde_vendida     NUMERIC(12,3) NOT NULL,
+    valor_unitario   NUMERIC(12,2) NOT NULL,
+    filial_id        INTEGER NOT NULL,
+    item             INTEGER NOT NULL,
+    unidade_medida   VARCHAR(10) NOT NULL,
+    CONSTRAINT fk_venda_produtos_filial
+        FOREIGN KEY (filial_id, produto_id)
+        REFERENCES produtos_filial(filial_id, produto_id)
 );
