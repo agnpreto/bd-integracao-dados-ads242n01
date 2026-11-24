@@ -1,179 +1,73 @@
-
 -- ============================================================
--- PARTE 4 - VALIDACAO DOS DADOS
--- Projeto: Integracao de Dados - ADS242N01
--- Banco: PostgreSQL
--- Base recebida: 33 registros na aba venda
+-- Validação — base_teste.xlsx (5 abas)
+-- Cada consulta retorna a quantidade de registros com o problema.
+-- Corresponde à tabela de erros de docs/parte4_validacao.md.
 -- ============================================================
 
--- 1. Conferir quantidade total de registros.
+-- 1. Totais por tabela (conferência da importação)
+SELECT 'fornecedor' AS tabela, COUNT(*) FROM fornecedor
+UNION ALL SELECT 'produtos_filial',     COUNT(*) FROM produtos_filial
+UNION ALL SELECT 'pedido_compra',       COUNT(*) FROM pedido_compra
+UNION ALL SELECT 'entradas_mercadoria', COUNT(*) FROM entradas_mercadoria
+UNION ALL SELECT 'venda',               COUNT(*) FROM venda;
 
-SELECT COUNT(*) AS total_registros
-FROM venda;
+-- 2. Vendas com (filial_id, produto_id) sem cadastro em produtos_filial
+SELECT COUNT(*) AS vendas_sem_cadastro
+FROM venda v
+LEFT JOIN produtos_filial pf
+       ON pf.filial_id = v.filial_id AND pf.produto_id = v.produto_id
+WHERE pf.produto_id IS NULL;
 
+-- 3. Detalhe dos produtos/filiais sem cadastro
+SELECT DISTINCT v.filial_id, v.produto_id
+FROM venda v
+LEFT JOIN produtos_filial pf
+       ON pf.filial_id = v.filial_id AND pf.produto_id = v.produto_id
+WHERE pf.produto_id IS NULL
+ORDER BY v.filial_id, v.produto_id;
 
--- 2. Contar campos obrigatorios vazios.
+-- 4. Pedidos com data_entrega < data_pedido
+SELECT COUNT(*) AS entrega_antes_pedido
+FROM pedido_compra
+WHERE data_entrega < data_pedido;
 
-SELECT COUNT(*) AS registros_com_campos_obrigatorios_vazios
-FROM venda
-WHERE venda_id IS NULL
-   OR data_emissao IS NULL
-   OR horariomov IS NULL
-   OR produto_id IS NULL
-   OR qtde_vendida IS NULL
-   OR valor_unitario IS NULL
-   OR filial_id IS NULL
-   OR item IS NULL
-   OR unidade_medida IS NULL;
-
-
--- 3. Identificar duplicidades na chave primaria composta.
-
-SELECT COUNT(*) AS grupos_de_chaves_duplicadas
-FROM (
-    SELECT
-        filial_id,
-        venda_id,
-        data_emissao,
-        produto_id,
-        item,
-        horariomov
-    FROM venda
-    GROUP BY
-        filial_id,
-        venda_id,
-        data_emissao,
-        produto_id,
-        item,
-        horariomov
-    HAVING COUNT(*) > 1
-) AS duplicidades;
-
-
--- 4. Contar quantidades ou valores negativos ou zerados.
-
-SELECT COUNT(*) AS registros_com_quantidade_ou_valor_invalido
-FROM venda
-WHERE qtde_vendida <= 0
-   OR valor_unitario <= 0;
-
-
--- 5. Contar quantidades fracionadas para unidade UN.
-
-SELECT COUNT(*) AS registros_com_quantidade_fracionada
+-- 5. Vendas com quantidade fracionada para unidade UN
+SELECT venda_id, qtde_vendida, unidade_medida
 FROM venda
 WHERE unidade_medida = 'UN'
-  AND qtde_vendida <> TRUNC(qtde_vendida);
+  AND qtde_vendida <> FLOOR(qtde_vendida)
+ORDER BY venda_id;
 
+-- 6. Vendas por horário (suspeita de importação sem variação)
+SELECT horariomov, COUNT(*) FROM venda
+GROUP BY horariomov ORDER BY 2 DESC;
 
--- 6. Contar vendas fora do ano de 2025.
+-- 7. Pedidos com ordem_compra = 0 (sem vínculo)
+SELECT COUNT(*) AS pedidos_sem_ordem
+FROM pedido_compra WHERE ordem_compra = 0;
 
-SELECT COUNT(*) AS registros_fora_de_2025
-FROM venda
-WHERE data_emissao < DATE '2025-01-01'
-   OR data_emissao >= DATE '2026-01-01';
+-- 8. Divergência entre entradas.qtde_recebida e pedido_compra.qtde_entregue
+SELECT COUNT(*) AS divergencias_qtde
+FROM entradas_mercadoria em
+JOIN pedido_compra pc ON pc.pedido_id = em.ordem_compra
+WHERE em.qtde_recebida <> pc.qtde_entregue;
 
+-- 9. Detalhe das divergências de quantidade
+SELECT em.ordem_compra, em.qtde_recebida, pc.qtde_entregue,
+       em.qtde_recebida - pc.qtde_entregue AS diferenca
+FROM entradas_mercadoria em
+JOIN pedido_compra pc ON pc.pedido_id = em.ordem_compra
+ORDER BY em.ordem_compra;
 
--- 7. Conferir vendas por produto em fevereiro de 2025.
-
-SELECT
-    produto_id,
-    SUM(qtde_vendida) AS quantidade_vendida,
-    ROUND(SUM(qtde_vendida * valor_unitario), 2) AS valor_total
-FROM venda
-WHERE data_emissao >= DATE '2025-02-01'
-  AND data_emissao < DATE '2025-03-01'
-GROUP BY produto_id
-ORDER BY produto_id;
-
-
--- 8. Conferir total geral de fevereiro de 2025.
-
-SELECT
-    COUNT(*) AS quantidade_vendas,
-    SUM(qtde_vendida) AS quantidade_total,
-    ROUND(SUM(qtde_vendida * valor_unitario), 2) AS valor_total
-FROM venda
-WHERE data_emissao >= DATE '2025-02-01'
-  AND data_emissao < DATE '2025-03-01';
-
-
--- 9. Conferir os registros por filial.
-
-SELECT
-    filial_id,
-    COUNT(*) AS total_vendas
-FROM venda
-GROUP BY filial_id
-ORDER BY filial_id;
-
-
--- 10. Conferir unidades de medida utilizadas.
-
-SELECT
-    unidade_medida,
-    COUNT(*) AS total
-FROM venda
-GROUP BY unidade_medida
-ORDER BY unidade_medida;
-
-
--- ============================================================
--- 11. RESUMO DAS VALIDACOES
--- ============================================================
--- Os resultados indicam quantos registros foram encontrados
--- em cada verificacao. Valores acima de zero exigem analise.
--- Nem toda ocorrencia representa necessariamente um erro.
-
-SELECT 'Campos obrigatorios vazios' AS verificacao,
-       COUNT(*) AS quantidade
-FROM venda
-WHERE venda_id IS NULL
-   OR data_emissao IS NULL
-   OR horariomov IS NULL
-   OR produto_id IS NULL
-   OR qtde_vendida IS NULL
-   OR valor_unitario IS NULL
-   OR filial_id IS NULL
-   OR item IS NULL
-   OR unidade_medida IS NULL
-
+-- 10. FKs órfãs (todas devem retornar 0 após conversão F1-F20)
+SELECT 'pedido_compra.fornecedor_id' AS fk, COUNT(*) FROM pedido_compra pc
+LEFT JOIN fornecedor f ON f.idfornecedor = pc.fornecedor_id
+WHERE f.idfornecedor IS NULL
 UNION ALL
-
-SELECT 'Chaves primarias duplicadas',
-       COUNT(*)
-FROM (
-    SELECT filial_id, venda_id, data_emissao,
-           produto_id, item, horariomov
-    FROM venda
-    GROUP BY filial_id, venda_id, data_emissao,
-             produto_id, item, horariomov
-    HAVING COUNT(*) > 1
-) AS duplicidades
-
+SELECT 'produtos_filial.idfornecedor', COUNT(*) FROM produtos_filial pf
+LEFT JOIN fornecedor f ON f.idfornecedor = pf.idfornecedor
+WHERE f.idfornecedor IS NULL
 UNION ALL
-
-SELECT 'Quantidade ou valor negativo/zerado',
-       COUNT(*)
-FROM venda
-WHERE qtde_vendida <= 0
-   OR valor_unitario <= 0
-
-UNION ALL
-
-SELECT 'Quantidade fracionada para unidade UN',
-       COUNT(*)
-FROM venda
-WHERE unidade_medida = 'UN'
-  AND qtde_vendida <> TRUNC(qtde_vendida)
-
-UNION ALL
-
-SELECT 'Vendas fora de 2025',
-       COUNT(*)
-FROM venda
-WHERE data_emissao < DATE '2025-01-01'
-   OR data_emissao >= DATE '2026-01-01';
-
-
--- FIM DA PARTE 4
+SELECT 'entradas.ordem_compra', COUNT(*) FROM entradas_mercadoria em
+LEFT JOIN pedido_compra pc ON pc.pedido_id = em.ordem_compra
+WHERE pc.pedido_id IS NULL;
