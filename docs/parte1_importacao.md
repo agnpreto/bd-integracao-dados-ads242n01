@@ -151,29 +151,34 @@ As informações adicionais presentes nos pedidos 21 a 29 deverão ser discutida
 
 Pendente de confirmação mediante execução do script corrigido e consultas de contagem no PostgreSQL.
 
-## Resultado final da importação
+## Resultado final da validação
 
-Após as correções realizadas nos scripts DDL e no código Python, foi executada novamente a importação dos dados da planilha base_teste.xlsx.
+Após a importação dos dados, foram executadas consultas SQL no PostgreSQL por meio do DBeaver, com o objetivo de verificar a quantidade de registros, a consistência das datas e a correspondência entre os fornecedores cadastrados.
 
-| Tabela | Planilha | Inseridos | Conflitos | Erros |
-|---|---:|---:|---:|---:|
-| fornecedor | 20 | 20 | 0 | 0 |
-| produtos_filial | 20 | 20 | 0 | 0 |
-| pedido_compra | 29 | 29 | 0 | 0 |
-| entradas_mercadoria | 20 | 20 | 0 | 0 |
-| venda | 33 | 33 | 0 | 0 |
-| **Total** | **122** | **122** | **0** | **0** |
+| Validação | Resultado |
+|---|---|
+| Total de registros na planilha | 122 |
+| Total de registros no PostgreSQL | 122 |
+| Erros de inserção | 0 |
+| Conflitos de chave primária | 0 |
+| Pedidos com data de entrega anterior à data do pedido | 20 |
+| Pedidos com fornecedores não cadastrados | 0 |
+| Produtos com fornecedores não cadastrados | 0 |
 
-A importação apresentou uma taxa de sucesso de 100%, sem erros de inserção ou conflitos de chave primária.
+### Inconsistências identificadas
 
-### Ressalvas sobre a qualidade dos dados
+Dos 29 registros da tabela pedido_compra, 20 apresentaram data de entrega anterior à data do pedido, correspondendo a aproximadamente 68,97% dos registros.
 
-Durante a importação, foram identificadas colunas sem cabeçalho na aba pedido_compra, referentes aos pedidos 21 a 29.
+Também foram identificadas colunas sem cabeçalho na planilha original, referentes aos pedidos 21 a 29.
 
-Optou-se por utilizar as colunas nomeadas, mantendo as informações adicionais preservadas na planilha original para posterior validação com o cliente.
+As inconsistências foram preservadas para investigação e validação com o cliente, evitando alterações nos dados sem confirmação das regras de negócio.
 
-A conclusão bem-sucedida da importação não elimina a necessidade de verificar a consistência e a exatidão dos dados.
+### Validação dos fornecedores
 
-### Conclusão da implantação
+As consultas realizadas com LEFT JOIN não retornaram registros sem correspondência na tabela fornecedor, confirmando a consistência das associações verificadas.
 
-As correções realizadas permitiram a criação das estruturas e a importação dos 122 registros no PostgreSQL. A próxima etapa consiste na elaboração das consultas SQL e na validação das informações importadas.
+### Conclusão da Parte 1
+
+A implantação das estruturas e a importação dos dados no PostgreSQL foram concluídas com sucesso. Os 122 registros foram inseridos sem erros ou conflitos de chave primária.
+
+Apesar do sucesso da importação, foram identificadas inconsistências relacionadas à qualidade dos dados, que deverão ser discutidas na etapa de validação com o cliente.
