@@ -1,135 +1,84 @@
-Parte 4 — Roteiro de Validação com o Cliente
 
-Aluna: Franciane de Carvalho Nogueira
-Disciplina: Banco de Dados
-Período analisado: Fevereiro de 2025
+# Parte 4 — Validação dos Dados com o Cliente
 
-1. Pontos a validar com o cliente
+## 1. Objetivo
 
-Durante a reunião, serão verificados:
+A validação tem como objetivo verificar se os dados importados para o banco de dados estão corretos, completos e consistentes com as informações fornecidas pelo cliente.
 
-A quantidade de registros importados em cada tabela.
+Essa etapa é importante para identificar possíveis erros antes da utilização definitiva do banco.
 
-Os produtos vendidos e os valores totais das vendas.
+## 2. Planejamento da reunião com o cliente
 
-Os pedidos de compra realizados e as mercadorias recebidas.
+Durante a reunião, serão apresentados:
 
-A existência de produtos e fornecedores sem cadastro.
+- A estrutura das tabelas do banco de dados.
+- Os dados importados das planilhas.
+- Os relacionamentos entre as tabelas.
+- As inconsistências identificadas.
+- As correções necessárias.
 
-A presença de informações duplicadas, ausentes ou inconsistentes.
+O cliente poderá confirmar se as informações armazenadas correspondem aos dados originais.
 
-A correspondência entre os dados da planilha e os registros do banco.
+## 3. Técnicas de validação
 
-2. Técnicas para garantir exatidão e precisão
+Serão utilizadas as seguintes técnicas:
 
-Serão utilizadas consultas SQL para conferir a integridade dos dados.
+**Validação de completude:** verifica se existem campos ou registros ausentes.
 
-As principais técnicas serão:
+**Validação de duplicidade:** identifica registros repetidos.
 
-COUNT(*): contar os registros das tabelas.
+**Validação de integridade:** verifica se os relacionamentos entre as tabelas estão corretos.
 
-SUM(): calcular quantidades e valores totais.
+**Validação de consistência:** identifica informações incompatíveis ou fora do padrão esperado.
 
-JOIN: relacionar informações de tabelas diferentes.
+**Validação de quantidade:** compara a quantidade de registros da origem com a quantidade armazenada no banco.
 
-WHERE: filtrar registros de fevereiro de 2025.
+## 4. Consultas SQL de validação
 
-GROUP BY: agrupar resultados por produto.
+O arquivo `sql/04_validacao.sql` contém dez consultas destinadas à identificação de problemas nos dados.
 
-IS NULL: identificar informações ausentes.
+As verificações contemplam:
 
-HAVING: localizar grupos com registros repetidos ou que atendam a condições específicas.
+1. Identificação de registros com informações ausentes.
+2. Verificação de possíveis duplicidades.
+3. Conferência dos relacionamentos entre tabelas.
+4. Identificação de produtos sem correspondência.
+5. Verificação de fornecedores.
+6. Conferência de pedidos.
+7. Identificação de inconsistências nos recebimentos.
+8. Verificação de valores inválidos.
+9. Conferência da integridade dos registros.
+10. Análise geral da qualidade dos dados.
 
-Os resultados deverão ser comparados com a planilha original.
+## 5. Tratamento das inconsistências
 
-3. Consultas preparadas para a reunião
+Quando forem identificados problemas, será realizada uma análise para determinar sua origem.
 
-As consultas serão armazenadas no arquivo sql/04_validacao.sql.
+As possíveis ações incluem:
 
-Elas deverão permitir:
+- Corrigir informações incorretas.
+- Identificar registros duplicados.
+- Preencher informações ausentes quando houver confirmação da origem.
+- Ajustar relacionamentos entre tabelas.
+- Solicitar confirmação do cliente quando houver dúvidas.
 
-Conferir o total de registros por tabela.
+Nenhuma informação será alterada sem verificar sua origem.
 
-Calcular as vendas de fevereiro de 2025.
+## 6. Critérios de aprovação
 
-Identificar vendas com quantidades ou preços inválidos.
+O banco será considerado validado quando:
 
-Verificar pedidos com quantidades inconsistentes.
+- Os registros estiverem corretamente importados.
+- Os relacionamentos entre as tabelas estiverem consistentes.
+- Não existirem duplicidades indevidas.
+- Os campos obrigatórios estiverem preenchidos.
+- As informações estiverem de acordo com os dados originais.
+- O cliente confirmar os resultados apresentados.
 
-Localizar entradas de mercadorias sem pedidos correspondentes.
+## 7. Conclusão
 
-Identificar produtos com fornecedores inexistentes.
+A etapa de validação permite avaliar a qualidade das informações armazenadas e identificar problemas que poderiam comprometer análises futuras.
 
-Verificar produtos vendidos sem cadastro na filial.
+As consultas SQL auxiliam na identificação das inconsistências e fornecem uma maneira organizada de verificar a integridade dos dados.
 
-Investigar possíveis duplicidades.
-
-Identificar datas de entrega anteriores às datas dos pedidos.
-
-4. Erros identificados e verificações pendentes
-
-Na análise do DDL original, foram identificados os seguintes problemas:
-
-Tabela
-
-Problema identificado
-
-Correção proposta
-
-entradas_mercadoria
-
-Campo ordem_compra utilizado na chave primária sem ter sido declarado
-
-Adicionar a coluna ordem_compra
-
-produtos_filial
-
-Coluna decricao escrita incorretamente
-
-Corrigir para descricao
-
-produtos_filial
-
-Campo idfonecedor escrito incorretamente
-
-Corrigir para idfornecedor
-
-produtos_filial
-
-Chave primária utiliza idproduto, não declarado
-
-Utilizar produto_id
-
-fornecedor
-
-Campo idforncedor escrito incorretamente
-
-Corrigir para idfornecedor
-
-fornecedor
-
-Chave primária referencia idproduto, inexistente
-
-Utilizar idfornecedor como chave primária
-
-Observação: Os problemas acima foram identificados pela leitura do código original. A quantidade de erros existentes nos dados ainda depende da execução das consultas no PostgreSQL.
-
-5. Conclusão
-
-A validação busca garantir que os dados de fevereiro de 2025 estejam completos, consistentes e corretamente relacionados.
-
-Após a execução das consultas, os resultados deverão ser apresentados ao cliente para conferência, identificação de divergências e aprovação dos dados.
-
-6. Resultados dos testes realizados no MySQL
-
-Foram realizados testes no MySQL Workbench para verificar a quantidade de registros nas tabelas do banco de dados integracao_dados_fran.
-
-Os testes confirmaram:
-
-- fornecedor: 21 registros.
-- produtos_filial: 0 registros.
-- pedido_compra: 0 registros.
-- entradas_mercadoria: consulta executada com sucesso.
-- venda: 33 registros.
-
-As consultas foram executadas, mas ainda é necessário conferir os dados importados e validar sua consistência.
+A aprovação definitiva depende da execução das consultas e da confirmação dos resultados pelo cliente.
