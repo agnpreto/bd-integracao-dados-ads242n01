@@ -1,61 +1,63 @@
 
--- DDL corrigido para PostgreSQL
+-- ============================================================
+-- PARTE 1 - ESTRUTURA DO BANCO
 -- Projeto: Integracao de Dados - ADS242N01
+-- SGBD: MySQL 8.0
+-- ============================================================
 
 CREATE TABLE fornecedor (
     idfornecedor VARCHAR(25) NOT NULL,
     razao_social VARCHAR(255) NOT NULL,
-    CONSTRAINT fornecedor_pkey PRIMARY KEY (idfornecedor)
+    PRIMARY KEY (idfornecedor)
 );
 
 CREATE TABLE produtos_filial (
-    filial_id INTEGER NOT NULL,
+    filial_id INT NOT NULL,
     produto_id VARCHAR(255) NOT NULL,
     descricao VARCHAR(255) NOT NULL,
-    estoque DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_unitario NUMERIC(12,4) NOT NULL DEFAULT 0,
-    preco_compra NUMERIC(12,4) NOT NULL DEFAULT 0,
-    preco_venda NUMERIC(12,4) NOT NULL DEFAULT 0,
+    estoque DOUBLE NOT NULL DEFAULT 0,
+    preco_unitario DOUBLE NOT NULL DEFAULT 0,
+    preco_compra DOUBLE NOT NULL DEFAULT 0,
+    preco_venda DOUBLE NOT NULL DEFAULT 0,
     idfornecedor VARCHAR(25),
-    CONSTRAINT produtos_filial_pkey PRIMARY KEY (filial_id, produto_id),
+
+    PRIMARY KEY (filial_id, produto_id),
+
     CONSTRAINT fk_produtos_fornecedor
         FOREIGN KEY (idfornecedor)
         REFERENCES fornecedor (idfornecedor)
 );
 
 CREATE TABLE pedido_compra (
-    pedido_id DOUBLE PRECISION NOT NULL,
+    pedido_id DOUBLE NOT NULL DEFAULT 0,
     data_pedido DATE,
-    item DOUBLE PRECISION NOT NULL,
-    produto_id VARCHAR(25) NOT NULL,
+    item DOUBLE NOT NULL DEFAULT 0,
+    produto_id VARCHAR(25) NOT NULL DEFAULT '0',
     descricao_produto VARCHAR(255),
-    ordem_compra DOUBLE PRECISION NOT NULL,
-    qtde_pedida DOUBLE PRECISION,
-    filial_id INTEGER,
+    ordem_compra DOUBLE NOT NULL DEFAULT 0,
+    qtde_pedida DOUBLE,
+    filial_id INT,
     data_entrega DATE,
-    qtde_entregue DOUBLE PRECISION NOT NULL DEFAULT 0,
-    qtde_pendente DOUBLE PRECISION NOT NULL DEFAULT 0,
-    preco_compra NUMERIC(12,4) DEFAULT 0,
-    fornecedor_id VARCHAR(25),
-    CONSTRAINT pedido_compra_pkey
-        PRIMARY KEY (pedido_id, produto_id, item),
-    CONSTRAINT fk_pedido_fornecedor
-        FOREIGN KEY (fornecedor_id)
-        REFERENCES fornecedor (idfornecedor)
+    qtde_entregue DOUBLE NOT NULL DEFAULT 0,
+    qtde_pendente DOUBLE NOT NULL DEFAULT 0,
+    preco_compra DOUBLE DEFAULT 0,
+    fornecedor_id INT DEFAULT 0,
+
+    PRIMARY KEY (pedido_id, produto_id, item)
 );
 
 CREATE TABLE entradas_mercadoria (
     data_entrada DATE,
     nro_nfe VARCHAR(255) NOT NULL,
-    item DOUBLE PRECISION NOT NULL,
-    produto_id VARCHAR(25) NOT NULL,
+    item DOUBLE NOT NULL DEFAULT 0,
+    produto_id VARCHAR(25) NOT NULL DEFAULT '0',
     descricao_produto VARCHAR(255),
-    ordem_compra DOUBLE PRECISION NOT NULL,
-    qtde_recebida DOUBLE PRECISION,
-    filial_id INTEGER,
-    custo_unitario NUMERIC(12,4) NOT NULL DEFAULT 0,
-    CONSTRAINT entradas_mercadoria_pkey
-        PRIMARY KEY (ordem_compra, item, produto_id, nro_nfe)
+    ordem_compra DOUBLE NOT NULL DEFAULT 0,
+    qtde_recebida DOUBLE,
+    filial_id INT,
+    custo_unitario DECIMAL(12, 4) NOT NULL DEFAULT 0,
+
+    PRIMARY KEY (ordem_compra, item, produto_id, nro_nfe)
 );
 
 CREATE TABLE venda (
@@ -63,11 +65,18 @@ CREATE TABLE venda (
     data_emissao DATE NOT NULL,
     horariomov VARCHAR(8) NOT NULL DEFAULT '00:00:00',
     produto_id VARCHAR(25) NOT NULL DEFAULT '',
-    qtde_vendida DOUBLE PRECISION,
-    valor_unitario NUMERIC(12,4) NOT NULL DEFAULT 0,
+    qtde_vendida DOUBLE,
+    valor_unitario DECIMAL(12, 4) NOT NULL DEFAULT 0,
     filial_id BIGINT NOT NULL DEFAULT 1,
-    item INTEGER NOT NULL DEFAULT 0,
+    item INT NOT NULL DEFAULT 0,
     unidade_medida VARCHAR(3),
-    CONSTRAINT pk_consumo
-        PRIMARY KEY (filial_id, venda_id, data_emissao, produto_id, item, horariomov)
+
+    PRIMARY KEY (
+        filial_id,
+        venda_id,
+        data_emissao,
+        produto_id,
+        item,
+        horariomov
+    )
 );
