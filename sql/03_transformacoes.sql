@@ -1,16 +1,16 @@
 
--- =====================================================
+-- ============================================================
 -- PARTE 3 - TRANSFORMACOES SQL
 -- Projeto: Integracao de Dados - ADS242N01
--- Responsavel: Franciane Nogueira
--- Banco de dados: PostgreSQL
--- =====================================================
+-- Banco: PostgreSQL
+-- ============================================================
 
 -- 1. Concatenar codigo e descricao do produto
 
 SELECT
     CONCAT(produto_id, ' - ', descricao_produto) AS produto
-FROM pedido_compra;
+FROM pedido_compra
+WHERE descricao_produto IS NOT NULL;
 
 
 -- 2. Formatar datas no padrao brasileiro
@@ -19,35 +19,62 @@ SELECT
     produto_id,
     descricao_produto,
     TO_CHAR(data_pedido, 'DD/MM/YYYY') AS data_solicitacao
-FROM pedido_compra;
+FROM pedido_compra
+WHERE data_pedido IS NOT NULL;
 
 
--- 3. Identificar produtos com mais de 10 requisicoes
+-- 3. Produtos requisitados mais de 10 vezes
+-- Interpretacao: contar quantos registros de requisicao
+-- cada produto possui em fevereiro de 2025.
+-- A quantidade requisitada representa a soma das unidades
+-- solicitadas nesses registros.
+
+WITH produtos_frequentes AS (
+    SELECT
+        produto_id,
+        COUNT(*) AS vezes_requisitado,
+        SUM(qtde_pedida) AS quantidade_total
+    FROM pedido_compra
+    WHERE data_pedido >= DATE '2025-02-01'
+      AND data_pedido < DATE '2025-03-01'
+    GROUP BY produto_id
+    HAVING COUNT(*) > 10
+)
 
 SELECT
-    produto_id,
-    COUNT(*) AS total_requisicoes
-FROM pedido_compra
-GROUP BY produto_id
-HAVING COUNT(*) > 10
-ORDER BY total_requisicoes DESC;
+    CONCAT(p.produto_id, ' - ', p.descricao_produto) AS produto,
+    p.qtde_pedida AS quantidade_requisitada,
+    TO_CHAR(p.data_pedido, 'DD/MM/YYYY') AS data_solicitacao,
+    pf.vezes_requisitado
+FROM pedido_compra p
+INNER JOIN produtos_frequentes pf
+    ON p.produto_id = pf.produto_id
+WHERE p.data_pedido >= DATE '2025-02-01'
+  AND p.data_pedido < DATE '2025-03-01'
+ORDER BY p.produto_id, p.data_pedido;
 
 
--- =====================================================
--- 4. TRIGGER PARA CADASTRO AUTOMATICO DE FORNECEDOR
--- Objetivo: gerar fornecedor quando o produto nao
--- possuir um fornecedor informado.
--- =====================================================
+-- ============================================================
+-- 4. TRIGGER: GERACAO AUTOMATICA DE FORNECEDOR
+-- ============================================================
+-- Quando um produto for inserido sem fornecedor,
+-- um novo fornecedor sera cadastrado automaticamente.
+-- O identificador gerado sera atribuido ao produto.
 
 CREATE OR REPLACE FUNCTION gerar_idfornecedor()
 RETURNS TRIGGER AS $$
 DECLARE
     novo_id VARCHAR(25);
 BEGIN
-    IF NEW.idfornecedor IS NULL THEN
+
+    IF NULLIF(BTRIM(NEW.idfornecedor), '') IS NULL THEN
 
         novo_id := 'FORN-' ||
-            SUBSTRING(MD5(gen_random_uuid()::TEXT), 1, 12);
+            SUBSTRING(
+                MD5(RANDOM()::TEXT || CLOCK_TIMESTAMP()::TEXT),
+                1,
+                12
+            );
 
         INSERT INTO fornecedor (
             idfornecedor,
@@ -67,7 +94,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- Evita duplicidade do gatilho ao executar novamente
+-- Evitar duplicacao do gatilho ao executar novamente
 
 DROP TRIGGER IF EXISTS trg_gerar_idfornecedor
 ON produtos_filial;
