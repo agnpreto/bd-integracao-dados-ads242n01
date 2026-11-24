@@ -1,84 +1,60 @@
 
-# Parte 4 — Validação dos Dados com o Cliente
+# Parte 4 — Reunião de validação dos dados
 
-## 1. Objetivo
+## 1. Objetivo da reunião
 
-A validação tem como objetivo verificar se os dados importados para o banco de dados estão corretos, completos e consistentes com as informações fornecidas pelo cliente.
+Validar a qualidade dos dados utilizados no projeto, verificando integridade, consistência, duplicidade, preenchimento e valores incompatíveis.
 
-Essa etapa é importante para identificar possíveis erros antes da utilização definitiva do banco.
+## 2. Pontos discutidos
 
-## 2. Planejamento da reunião com o cliente
-
-Durante a reunião, serão apresentados:
-
-- A estrutura das tabelas do banco de dados.
-- Os dados importados das planilhas.
-- Os relacionamentos entre as tabelas.
-- As inconsistências identificadas.
-- As correções necessárias.
-
-O cliente poderá confirmar se as informações armazenadas correspondem aos dados originais.
+- Conferência da quantidade de registros importados.
+- Verificação de campos obrigatórios.
+- Identificação de registros duplicados.
+- Verificação de quantidades e valores negativos ou zerados.
+- Conferência das datas das vendas.
+- Análise das quantidades vendidas por produto.
+- Conferência dos registros por filial.
 
 ## 3. Técnicas de validação
 
-Serão utilizadas as seguintes técnicas:
+Foram preparadas consultas SQL para:
 
-**Validação de completude:** verifica se existem campos ou registros ausentes.
+1. Contar os registros da tabela de vendas.
+2. Localizar campos obrigatórios sem preenchimento.
+3. Identificar identificadores duplicados.
+4. Encontrar quantidades e valores inválidos.
+5. Localizar quantidades fracionadas com unidade de medida UN.
+6. Conferir datas fora do período de 2025.
+7. Agrupar vendas por produto.
+8. Conferir os totais de fevereiro de 2025.
+9. Agrupar registros por filial.
+10. Conferir as unidades de medida.
 
-**Validação de duplicidade:** identifica registros repetidos.
+As consultas estão registradas em `sql/04_validacao.sql`.
 
-**Validação de integridade:** verifica se os relacionamentos entre as tabelas estão corretos.
+## 4. Inconsistências identificadas para investigação
 
-**Validação de consistência:** identifica informações incompatíveis ou fora do padrão esperado.
+Na análise dos registros fornecidos, foram observadas quantidades fracionadas associadas à unidade de medida UN.
 
-**Validação de quantidade:** compara a quantidade de registros da origem com a quantidade armazenada no banco.
+Exemplos:
+- Produto P4: 38,6 unidades.
+- Produto P8: 20,04 unidades.
+- Produto P12: 2,86 unidades.
+- Produto P16: 37,11 unidades.
+- Produto P26: 3,11 unidades.
 
-## 4. Consultas SQL de validação
+Esses registros devem ser conferidos com a origem dos dados para determinar se representam erro de preenchimento ou uma característica legítima do produto.
 
-O arquivo `sql/04_validacao.sql` contém dez consultas destinadas à identificação de problemas nos dados.
+## 5. Limitações da validação
 
-As verificações contemplam:
+A base disponibilizada contém somente a aba `venda`, com 33 registros.
 
-1. Identificação de registros com informações ausentes.
-2. Verificação de possíveis duplicidades.
-3. Conferência dos relacionamentos entre tabelas.
-4. Identificação de produtos sem correspondência.
-5. Verificação de fornecedores.
-6. Conferência de pedidos.
-7. Identificação de inconsistências nos recebimentos.
-8. Verificação de valores inválidos.
-9. Conferência da integridade dos registros.
-10. Análise geral da qualidade dos dados.
+Não foi possível validar com dados reais as tabelas de fornecedores, produtos por filial, pedidos de compra e entradas de mercadoria, pois seus dados não foram disponibilizados.
 
-## 5. Tratamento das inconsistências
+As consultas foram preparadas para execução no PostgreSQL. Os resultados de execução devem ser registrados após a conferência no banco.
 
-Quando forem identificados problemas, será realizada uma análise para determinar sua origem.
+## 6. Conclusão
 
-As possíveis ações incluem:
+A validação preparada permite investigar problemas de preenchimento, duplicidade, valores e consistência dos registros de vendas.
 
-- Corrigir informações incorretas.
-- Identificar registros duplicados.
-- Preencher informações ausentes quando houver confirmação da origem.
-- Ajustar relacionamentos entre tabelas.
-- Solicitar confirmação do cliente quando houver dúvidas.
-
-Nenhuma informação será alterada sem verificar sua origem.
-
-## 6. Critérios de aprovação
-
-O banco será considerado validado quando:
-
-- Os registros estiverem corretamente importados.
-- Os relacionamentos entre as tabelas estiverem consistentes.
-- Não existirem duplicidades indevidas.
-- Os campos obrigatórios estiverem preenchidos.
-- As informações estiverem de acordo com os dados originais.
-- O cliente confirmar os resultados apresentados.
-
-## 7. Conclusão
-
-A etapa de validação permite avaliar a qualidade das informações armazenadas e identificar problemas que poderiam comprometer análises futuras.
-
-As consultas SQL auxiliam na identificação das inconsistências e fornecem uma maneira organizada de verificar a integridade dos dados.
-
-A aprovação definitiva depende da execução das consultas e da confirmação dos resultados pelo cliente.
+A conclusão da validação integral depende da disponibilização das demais abas e da execução das consultas no banco de dados.
