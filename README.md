@@ -7,8 +7,9 @@
 ## Equipe
 
 **Nome da dupla:** Franciane Nogueira e John Erik
-| --- | --- | --- |
+
 | Nome | Matrícula | Usuário do GitHub |
+| --- | --- | --- |
 | Franciane Nogueira | 2418640 | [@francinogueira0611-ctrl](https://github.com/francinogueira0611-ctrl) |
 | John Erik | 2422168 | [@jaserik](https://github.com/jaserik) |
 
