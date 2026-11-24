@@ -1,69 +1,56 @@
-# Parte 1 — Importação e implantação dos dados
+# Parte 1 — Documentação do processo de importação
 
-## 1. Objetivo
+## Ferramentas utilizadas
 
-Preparar a estrutura do banco de dados e realizar a importação dos dados disponibilizados para teste, conferindo a quantidade de registros entre a fonte original e o PostgreSQL.
+- PostgreSQL 18 para armazenamento dos dados.
+- Python com pandas e openpyxl para leitura da planilha Excel.
+- psycopg2 para conexão e importação dos dados no PostgreSQL.
+- MySQL 8.0 para teste da estrutura alternativa do banco.
 
-## 2. Fonte dos dados
+## Estrutura da planilha
 
-Arquivo utilizado: `dados/base_teste.xlsx`.
+O arquivo `dados/base_teste.xlsx` possui cinco abas:
 
-A base disponibilizada contém somente a aba `venda`, com 33 registros e os seguintes campos:
+| Aba | Registros esperados |
+|---|---:|
+| fornecedor | 20 |
+| produtos_filial | 20 |
+| pedido_compra | 29 |
+| entradas_mercadoria | 20 |
+| venda | 33 |
+| **Total** | **122** |
 
-- `venda_id`
-- `data_emissao`
-- `horariomov`
-- `produto_id`
-- `qtde_vendida`
-- `valor_unitario`
-- `filial_id`
-- `item`
-- `unidade_medida`
+### Tratamento das colunas
 
-## 3. Limitação identificada
+- Na aba `produtos_filial`, a coluna `idproduto` é utilizada para preencher `produto_id` no banco.
+- Os códigos de fornecedores, como `F1` e `F8`, são mantidos como texto.
+- Na aba `pedido_compra`, as colunas extras vazias são descartadas.
+- As datas são convertidas corretamente para o formato de data do PostgreSQL.
+- A quantidade pendente é calculada pela diferença entre a quantidade pedida e a quantidade entregue.
 
-As abas `fornecedor`, `produtos_filial`, `pedido_compra` e `entradas_mercadoria`, previstas no enunciado, não estavam disponíveis no arquivo recebido.
+## Correções realizadas
 
-Por esse motivo, não foi possível importar nem validar essas quatro tabelas com dados reais.
+O DDL original apresentou problemas de sintaxe, nomes de colunas e tipos de dados incompatíveis.
 
-Nenhum registro fictício foi criado para simular uma importação completa.
+Foram corrigidos:
+- Nomes de colunas com erros de digitação.
+- Chaves primárias e estrangeiras.
+- Tipos de dados dos identificadores.
+- Coluna `ordem_compra` em `entradas_mercadoria`.
+- Compatibilidade entre PostgreSQL e MySQL.
 
-## 4. Comparação entre a fonte e o banco de dados
+O script de importação também foi ajustado para tratar datas, valores vazios, colunas extras e registros duplicados.
 
-| Tabela | Registros na planilha | Registros no PostgreSQL | Situação |
-|---|---:|---:|---|
-| venda | 33 | 33 | Importação conferida |
-| fornecedor | Aba ausente | 0 | Fonte indisponível |
-| produtos_filial | Aba ausente | 0 | Fonte indisponível |
-| pedido_compra | Aba ausente | 0 | Fonte indisponível |
-| entradas_mercadoria | Aba ausente | 0 | Fonte indisponível |
+## Conferência da importação
 
-A conferência foi realizada por consultas `SELECT COUNT(*)` no PostgreSQL. Os resultados confirmaram a importação dos 33 registros da tabela `venda`. As outras quatro tabelas foram criadas, mas permaneceram vazias devido à ausência das respectivas abas na planilha.
+A quantidade de registros esperada em cada tabela é:
 
-## 5. Conferência das vendas de fevereiro de 2025
+| Tabela | Planilha |
+|---|---:|
+| fornecedor | 20 |
+| produtos_filial | 20 |
+| pedido_compra | 29 |
+| entradas_mercadoria | 20 |
+| venda | 33 |
 
-Na aba `venda`, foram identificados 14 registros referentes a fevereiro de 2025.
-
-- Quantidade vendida: 173,22.
-- Valor total: R$ 14.093,17.
-
-Esses valores foram calculados a partir dos dados disponibilizados na planilha e conferidos por consulta SQL no PostgreSQL.
-
-## 6. Procedimento de importação
-
-A implantação foi realizada no PostgreSQL, utilizando os seguintes procedimentos:
-
-- criação das cinco tabelas por meio do script DDL;
-- identificação das tabelas criadas no banco;
-- inserção dos 33 registros disponíveis na tabela `venda`, por meio de comandos SQL `INSERT`;
-- conferência da quantidade de registros por meio de consultas `SELECT COUNT(*)`.
-
-A execução confirmou a inserção de 33 registros na tabela `venda`, sem registros nas quatro tabelas cujas abas estavam ausentes.
-
-## 7. Conclusão
-
-A base recebida permite trabalhar com os dados de vendas, mas não permite comprovar a importação integral das cinco tabelas previstas na atividade.
-
-A ausência das demais abas foi documentada como limitação da fonte de dados, preservando a integridade das informações e sem criação de registros fictícios.
-
-A importação da tabela `venda` foi concluída e conferida no PostgreSQL, com correspondência de 33 registros entre a planilha e o banco de dados.
+A quantidade efetivamente gravada no banco deverá ser conferida com consultas `SELECT COUNT(*)` após a execução do script
