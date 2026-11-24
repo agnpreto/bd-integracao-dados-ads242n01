@@ -1,12 +1,35 @@
-# PARTE 4 — VALIDAÇÃO COM O CLIENTE
+# Parte 4 — Validação dos dados com o cliente
 
-## 1. Objetivo
+## 1. Objetivo da reunião
 
-Documentar as inconsistências identificadas durante a importação, integração e transformação dos dados, apresentando os pontos que necessitam de validação com o cliente.
+Validar os dados importados da planilha fornecida pelo cliente para o banco de dados PostgreSQL, com foco nas movimentações de fevereiro de 2025, garantindo a integridade, consistência e exatidão das informações.
 
-## 2. Validação da importação
+## 2. Pontos a serem validados com o cliente
 
-A importação da planilha base_teste.xlsx para o PostgreSQL foi realizada sem erros de inserção.
+- Quantidade de registros importados em cada tabela.
+- Valores e quantidades das vendas de fevereiro de 2025.
+- Datas dos pedidos de compra e das entregas.
+- Correspondência entre produtos, fornecedores e filiais.
+- Pedidos de compra sem recebimento correspondente.
+- Ordens de compra com identificador igual a zero.
+- Produtos vendidos sem cadastro correspondente na filial.
+- Quantidades pedidas, entregues e pendentes.
+- Produtos com quantidade requisitada superior a 10 unidades.
+- Valores adicionais presentes em colunas sem cabeçalho na planilha original.
+
+## 3. Técnicas utilizadas para garantir a exatidão dos dados
+
+- Comparação da quantidade de registros da planilha com os registros armazenados no banco.
+- Utilização de consultas SQL com COUNT, SUM, GROUP BY e HAVING.
+- Validação dos relacionamentos por meio de LEFT JOIN.
+- Identificação de registros sem correspondência utilizando NOT EXISTS.
+- Verificação da consistência cronológica das datas.
+- Conferência dos cálculos das quantidades pendentes.
+- Verificação das chaves primárias e dos relacionamentos entre tabelas.
+- Comparação dos resultados financeiros com a planilha original.
+- Preservação da planilha original, sem alterações nos dados fornecidos pelo cliente.
+
+## 4. Resultados da importação
 
 | Tabela | Registros importados |
 |---|---:|
@@ -15,116 +38,91 @@ A importação da planilha base_teste.xlsx para o PostgreSQL foi realizada sem e
 | pedido_compra | 29 |
 | entradas_mercadoria | 20 |
 | venda | 33 |
-| **Total** | **122** |
+| Total | 122 |
 
-## 3. Inconsistências identificadas
+A importação foi concluída sem erros de inserção e sem conflitos registrados pelo script.
 
-### 3.1. Datas de entrega inconsistentes
+## 5. Resultados referentes a fevereiro de 2025
 
-Foram identificados 20 registros de pedidos de compra cuja data de entrega é anterior à data do pedido.
+- Registros de vendas: 14.
+- Valor total calculado das vendas: R$ 14.093,17.
+- Produtos com quantidade requisitada superior a 10 unidades: 10.
+- Registros de pedidos com datas de entrega anteriores às datas dos pedidos: 16.
 
-**Validação com o cliente:** confirmar se as datas estão incorretas na planilha de origem e definir o procedimento de correção.
+## 6. Inconsistências identificadas
 
-### 3.2. Pedidos sem entrada de mercadoria correspondente
+### 6.1. Datas de entrega anteriores às datas dos pedidos
 
-Foram identificados 11 registros de pedidos sem entrada correspondente, considerando os critérios de ordem de compra, produto, filial e quantidade recebida positiva.
+Foram encontrados 20 registros inconsistentes na base completa, dos quais 16 possuem data de pedido em fevereiro de 2025.
 
-**Validação com o cliente:** verificar se os pedidos estão pendentes ou se existem inconsistências nos identificadores utilizados no relacionamento entre as tabelas.
+Essas datas deverão ser verificadas com o cliente antes de qualquer correção.
 
-### 3.3. Colunas sem cabeçalho
+Consulta: SELECT * FROM public.pedido_compra WHERE data_entrega &lt; data_pedido;
 
-Foram identificadas colunas sem cabeçalho na aba pedido_compra da planilha original.
+### 6.2. Ordens de compra zeradas
 
-**Validação com o cliente:** identificar a finalidade dessas colunas e verificar se devem ser incorporadas ao banco de dados.
+Foram encontrados 11 registros com ordem de compra igual a zero.
 
-### 3.4. Ordens de compra com valor zero
+É necessário confirmar se esse valor representa uma ordem inexistente, não informada ou inválida.
 
-Foram identificados registros com ordem de compra igual a zero.
+Consulta: SELECT * FROM public.pedido_compra WHERE ordem_compra = 0;
 
-**Validação com o cliente:** confirmar se o valor zero representa uma ordem inexistente, uma informação não preenchida ou um identificador válido.
+### 6.3. Vendas sem produto cadastrado na filial
 
-## 4. Integridade dos fornecedores
+Foram identificados 13 registros de vendas sem correspondência entre produto e filial na tabela produtos_filial, considerando toda a base.
 
-As consultas de validação não identificaram pedidos de compra ou produtos cadastrados com fornecedores sem correspondência na tabela fornecedor.
+Consulta:
 
-## 5. Regras de negócio
+SELECT v.*
+FROM public.venda v
+LEFT JOIN public.produtos_filial p
+ON v.produto_id = p.produto_id
+AND v.filial_id = p.filial_id
+WHERE p.produto_id IS NULL;
 
-### 5.1. Geração automática de fornecedores
+### 6.4. Pedidos sem recebimento correspondente
 
-Foi implementada uma sequência associada a uma função e uma trigger no PostgreSQL para gerar automaticamente um identificador de fornecedor quando um produto for inserido sem essa informação.
+Foram identificados 11 registros de pedidos sem recebimento positivo correspondente, conforme os critérios utilizados na consulta.
 
-O fornecedor gerado recebe a descrição "Fornecedor provisório".
+Todos os registros retornados possuem ordem de compra igual a zero, o que limita a confiabilidade do relacionamento entre pedidos e entradas de mercadorias.
 
-**Validação com o cliente:** confirmar se a criação automática de fornecedores provisórios atende às necessidades do negócio.
+Consulta:
 
-### 5.2. Produtos requisitados mais de dez vezes
+SELECT p.*
+FROM public.pedido_compra p
+WHERE NOT EXISTS (
+SELECT 1
+FROM public.entradas_mercadoria e
+WHERE e.ordem_compra = p.ordem_compra
+AND e.produto_id = p.produto_id
+AND e.filial_id = p.filial_id
+AND e.qtde_recebida > 0
+);
 
-A consulta foi implementada considerando a soma das quantidades requisitadas por produto durante fevereiro de 2025.
+### 6.5. Colunas sem cabeçalho
 
-Foram encontrados dez produtos com quantidade requisitada superior a dez unidades.
+Durante a importação, foram identificados valores adicionais em colunas sem cabeçalho nos pedidos de compra de identificadores 21 a 29, conforme o aviso do script.
 
-**Validação com o cliente:** confirmar se o requisito corresponde à quantidade de unidades requisitadas ou à quantidade de solicitações distintas.
+Esses valores foram preservados na planilha original e precisam ser esclarecidos pelo cliente antes de serem incorporados ao banco.
 
-### 5.3. Padronização dos dados
+Essa ocorrência deve ser conferida diretamente na planilha, pois os valores adicionais não estão representados nas tabelas importadas.
 
-Foram realizadas as seguintes transformações:
+## 7. Validações sem inconsistências
 
-- Concatenação do código com a descrição do produto.
-- Formatação das datas no padrão DD/MM/AAAA.
-- Agrupamento das quantidades requisitadas por produto.
-- Geração automática de identificadores de fornecedores.
+- Quantidades pendentes divergentes do cálculo: 0.
+- Pedidos sem fornecedor correspondente: 0.
+- Produtos sem fornecedor correspondente: 0.
 
-## 6. Conclusão
+## 8. Consultas SQL
 
-A importação dos 122 registros e as transformações SQL foram executadas no PostgreSQL.
+As consultas utilizadas para a reunião de validação estão disponibilizadas no arquivo sql/04_validacao.sql.
 
-As inconsistências identificadas devem ser apresentadas ao cliente para definição das regras de tratamento, preservando os dados originais até que as correções sejam autorizadas.
+## 9. Conclusão
 
-A validação das regras de negócio pelo cliente permanece pendente.
+A integração dos dados foi realizada com sucesso do ponto de vista da importação, totalizando 122 registros inseridos sem erros.
 
-## 7. Roteiro da reunião de validação
+Entretanto, foram identificadas inconsistências relacionadas às datas, ordens de compra, cadastros de produtos e correspondência entre pedidos e recebimentos.
 
-A reunião terá como objetivo validar os dados referentes a fevereiro de 2025.
+Essas ocorrências deverão ser apresentadas ao cliente para esclarecimento e definição das correções necessárias.
 
-- Apresentar os resultados da importação.
-- Conferir os valores e as quantidades das vendas de fevereiro.
-- Validar os pedidos de compra e as entradas de mercadorias.
-- Apresentar as inconsistências identificadas.
-- Confirmar as regras de negócio utilizadas nas consultas e transformações.
-- Definir, junto ao cliente, os procedimentos para correção dos dados.
-- Registrar a aprovação ou as solicitações de ajustes.
-
-## 8. Técnicas para garantir a exatidão dos dados
-
-- Comparação da quantidade de registros entre a planilha original e o banco de dados.
-- Conferência dos valores financeiros e das quantidades movimentadas.
-- Verificação da integridade referencial entre as tabelas.
-- Validação dos formatos e da consistência das datas.
-- Verificação de registros duplicados por meio das chaves primárias.
-- Identificação de valores ausentes ou inconsistentes.
-- Conferência dos cálculos das quantidades pendentes.
-- Validação por amostragem dos registros com a planilha original.
-- Preservação da planilha original, garantindo a rastreabilidade dos dados.
-- Aprovação das regras de negócio pelo cliente.
-
-## 9. Consultas preparadas para a reunião
-
-As consultas estão disponíveis no arquivo `sql/04_validacao.sql`.
-
-| Validação | Consulta |
-|---|---|
-| Quantidade de registros importados | 1 |
-| Datas de entrega inconsistentes | 2, 3 e 4 |
-| Integridade dos fornecedores | 5 e 6 |
-| Pedidos sem entrada correspondente | 7 |
-| Ordens de compra iguais a zero | 8 |
-| Vendas sem produto cadastrado na filial | 9 |
-| Quantidades pendentes inconsistentes | 10 |
-| Vendas de fevereiro de 2025 | 11 e 12 |
-| Produtos requisitados acima de dez unidades | 13 |
-
-As colunas sem cabeçalho identificadas na planilha original devem ser verificadas diretamente no arquivo Excel, pois os valores adicionais não foram incorporados à estrutura relacional.
-
-Os resultados das novas consultas deverão ser registrados após sua execução.
-
-Nenhuma correção definitiva dos dados originais deverá ser realizada sem a validação do cliente.
+A aprovação definitiva dos dados dependerá da validação do cliente, mantendo a planilha original preservada.
