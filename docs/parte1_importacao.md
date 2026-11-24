@@ -2,69 +2,79 @@
 
 ## 1. Objetivo
 
-Esta etapa teve como objetivo analisar a planilha `dados/base_teste.xlsx`, preparar a estrutura do banco de dados e importar os registros disponíveis, identificando problemas nos dados e no DDL original.
+Analisar a planilha `dados/base_teste.xlsx`, preparar a estrutura do banco de dados em PostgreSQL 18, importar os registros das cinco abas e documentar os tratamentos aplicados aos dados e as correções realizadas no DDL original.
 
 ## 2. Ferramentas utilizadas
 
-- Excel: inspeção da planilha recebida.
-- PostgreSQL 18.6: ambiente utilizado para testar a estrutura e as consultas SQL.
-- SQL: criação das tabelas, inserção e conferência dos registros.
-- Python, pandas, openpyxl e psycopg2: utilizados na preparação do script de importação `scripts/importar.py`.
+- **PostgreSQL 18** — ambiente de teste da estrutura e das consultas SQL.
+- **Python 3** (pandas, openpyxl, psycopg2) — leitura da planilha e script de importação (`scripts/importar.py`).
+- **SQL** — criação das tabelas, inserção e conferência dos registros.
+- **Excel** — inspeção manual da planilha recebida.
+- **MySQL 8** — teste de compatibilidade da estrutura alternativa.
 
 ## 3. Estrutura da planilha recebida
 
-A base disponibilizada continha somente a aba `venda`, com 33 registros.
+O arquivo `base_teste.xlsx` contém as cinco abas descritas no enunciado:
 
-As outras quatro abas previstas na atividade não estavam presentes no arquivo recebido.
-
-| Coluna | Tipo de dado |
-|---|---|
-| venda_id | Inteiro |
-| data_emissao | Data |
-| horariomov | Texto |
-| produto_id | Texto |
-| qtde_vendida | Numérico |
-| valor_unitario | Numérico decimal |
-| filial_id | Inteiro |
-| item | Inteiro |
-| unidade_medida | Texto |
-
-## 4. Tratamentos e correções
-
-Foram considerados os seguintes cuidados:
-
-- Conversão das datas para o formato aceito pelo banco.
-- Preservação dos códigos de produtos como texto.
-- Utilização de tipos numéricos para quantidades e valores.
-- Definição de chaves primárias para evitar duplicidade de registros.
-- Correção de nomes de colunas e restrições do DDL original.
-- Utilização de variáveis de ambiente para as credenciais do banco, evitando senhas reais diretamente no código.
-
-## 5. Quantidade de registros
-
-A quantidade encontrada na base recebida foi:
-
-| Tabela | Registros disponíveis |
+| Aba | Registros |
 |---|---:|
-| fornecedor | Não disponibilizada |
-| produtos_filial | Não disponibilizada |
-| pedido_compra | Não disponibilizada |
-| entradas_mercadoria | Não disponibilizada |
+| fornecedor | 20 |
+| produtos_filial | 20 |
+| pedido_compra | 29 |
+| entradas_mercadoria | 20 |
 | venda | 33 |
-| **Total disponível** | **33** |
+| **Total** | **122** |
 
-A conferência da tabela `venda` foi realizada por meio de consulta SQL com `COUNT(*)`.
+### Tipos de dados por aba
 
-As quatro tabelas sem dados não foram preenchidas com registros fictícios.
+- **fornecedor**: `idfornecedor` (int), `nome`, `cnpj`, `telefone`, `email`, `endereco` (texto).
+- **produtos_filial**: `filial_id` (int), `idproduto` → `produto_id` (texto), `descricao` (texto), `idfornecedor` (int), `unidade_medida` (texto), `preco_unitario` (decimal).
+- **pedido_compra**: `pedido_id` (int), `fornecedor_id` (int), `item` (int), `produto_id` (texto), `qtde_pedida` e `qtde_entregue` (numérico), `data_pedido` (data), `valor_unitario` (decimal).
+- **entradas_mercadoria**: `filial_id` (int), `fornecedor_id` (int), `produto_id` (texto), `item` (int), `ordem_compra` (int), `data_entrada` (data), `qtde_entregue` (numérico), `valor_unitario` (decimal).
+- **venda**: `venda_id` (int), `data_emissao` (data), `horariomov` (hora), `produto_id` (texto), `qtde_vendida` (numérico), `valor_unitario` (decimal), `filial_id` (int), `item` (int), `unidade_medida` (texto).
 
-## 6. Limitações encontradas
+## 4. Tratamentos e correções aplicados
 
-A ausência das abas `fornecedor`, `produtos_filial`, `pedido_compra` e `entradas_mercadoria` impediu a importação e a conferência dessas informações.
+### 4.1 Correções no DDL original
 
-Por isso, as consultas que dependem dessas tabelas foram preparadas conforme a estrutura definida no projeto, mas não puderam ser testadas com os dados originais dessas abas.
+O DDL fornecido apresentava erros intencionais, que foram corrigidos:
 
-## 7. Conclusão
+- **Nomes de colunas**: `idforncedor` → `idfornecedor`; `decricao` → `descricao`; `idfonecedor` → `idfornecedor`.
+- **Chave primária de `fornecedor`**: removida a coluna inexistente `idproduto` da PK; mantido apenas `idfornecedor`.
+- **Chave primária de `produtos_filial`**: substituída por `(filial_id, produto_id)`, com `filial_id NOT NULL`.
+- **Coluna ausente em `entradas_mercadoria`**: adicionada a coluna `ordem_compra`, usada na PK e no relacionamento com `pedido_compra`.
+- **Tipos de dados incorretos**: identificadores e números de item estavam como `float8` / `DOUBLE PRECISION` e foram convertidos para `INTEGER` (`pedido_id`, `item`, `ordem_compra`).
+- **Chave primária de `venda`**: simplificada para `venda_id` (chave natural), eliminando a PK composta redundante do DDL original.
+- **Chaves estrangeiras adicionadas**:
+  - `produtos_filial.idfornecedor → fornecedor.idfornecedor`
+  - `pedido_compra.fornecedor_id → fornecedor.idfornecedor`
+  - `entradas_mercadoria.ordem_compra → pedido_compra.pedido_id`
+  - `entradas_mercadoria.(filial_id, produto_id) → produtos_filial.(filial_id, produto_id)`
+  - `venda.(filial_id, produto_id) → produtos_filial.(filial_id, produto_id)`
 
-A base recebida permitiu trabalhar com os 33 registros de vendas e realizar consultas e verificações sobre essas informações.
+### 4.2 Tratamentos nos dados
 
-A importação completa das cinco tabelas depende do fornecimento das quatro abas ausentes. Nenhum dado fictício foi criado para apresentar uma conclusão que não pudesse ser comprovada.
+- **Datas** (`data_pedido`, `data_entrada`, `data_emissao`) convertidas para `DATE`.
+- **Horário** (`horariomov`) convertido para `TIME`.
+- **Códigos de produto** mantidos como texto (`VARCHAR`), preservando zeros à esquerda.
+- **Quantidades e valores** convertidos para `NUMERIC`, evitando erros de ponto flutuante.
+- **Colunas extras vazias** descartadas (ex.: colunas `Unnamed` em `pedido_compra`).
+- **Registros duplicados** tratados com `ON CONFLICT DO NOTHING` sobre as PKs.
+- **Quantidade pendente** (em `pedido_compra`) calculada como `qtde_pedida - qtde_entregue`.
+
+### 4.3 Boas práticas adotadas
+
+- Credenciais do banco via **variáveis de ambiente**, sem senha no código-fonte.
+- Importação em **transação única**, com `COMMIT`/`ROLLBACK`, garantindo atomicidade.
+- Ordem de importação respeita as FKs: `fornecedor → produtos_filial → pedido_compra → entradas_mercadoria → venda`.
+
+## 5. Conferência da importação
+
+A quantidade efetivamente gravada é verificada com a consulta:
+
+```sql
+SELECT 'fornecedor'          AS tabela, COUNT(*) FROM fornecedor
+UNION ALL SELECT 'produtos_filial',     COUNT(*) FROM produtos_filial
+UNION ALL SELECT 'pedido_compra',       COUNT(*) FROM pedido_compra
+UNION ALL SELECT 'entradas_mercadoria', COUNT(*) FROM entradas_mercadoria
+UNION ALL SELECT 'venda',               COUNT(*) FROM venda;
