@@ -28,17 +28,17 @@ Por esse motivo, não foi possível importar nem validar essas quatro tabelas co
 
 Nenhum registro fictício foi criado para simular uma importação completa.
 
-## 4. Conferência da fonte de dados
+## 4. Comparação entre a fonte e o banco de dados
 
-| Tabela | Registros na planilha | Situação |
-| --- | ---: | --- |
-| venda | 33 | Dados disponíveis |
-| fornecedor | Não disponível | Aba ausente |
-| produtos_filial | Não disponível | Aba ausente |
-| pedido_compra | Não disponível | Aba ausente |
-| entradas_mercadoria | Não disponível | Aba ausente |
+| Tabela | Registros na planilha | Registros no PostgreSQL | Situação |
+|---|---:|---:|---|
+| venda | 33 | A confirmar | Dados disponíveis |
+| fornecedor | Aba ausente | A confirmar | Fonte indisponível |
+| produtos_filial | Aba ausente | A confirmar | Fonte indisponível |
+| pedido_compra | Aba ausente | A confirmar | Fonte indisponível |
+| entradas_mercadoria | Aba ausente | A confirmar | Fonte indisponível |
 
-A quantidade efetivamente inserida no PostgreSQL deve ser confirmada por meio de `SELECT COUNT(*)`. Não foi registrada uma contagem do banco sem comprovação da execução.
+A quantidade efetivamente importada deverá ser confirmada por consultas `SELECT COUNT(*)` no PostgreSQL. Os valores serão preenchidos após a execução do banco.
 
 ## 5. Conferência das vendas de fevereiro de 2025
 
@@ -60,10 +60,12 @@ O script `scripts/importar.py` foi preparado para:
 - utilizar variáveis de ambiente para as configurações de conexão;
 - importar os registros disponíveis para o PostgreSQL.
 
-A execução deve ser conferida por consultas de contagem de registros no banco de dados.
+A execução deverá ser conferida por consultas de contagem de registros no banco de dados.
 
 ## 7. Conclusão
 
 A base recebida permite trabalhar com os dados de vendas, mas não permite comprovar a importação integral das cinco tabelas previstas na atividade.
 
 A ausência das demais abas foi documentada como limitação da fonte de dados, preservando a integridade das informações e sem criação de registros fictícios.
+
+A comparação final entre os registros da planilha e os registros do PostgreSQL será concluída após a execução e conferência da importação.
