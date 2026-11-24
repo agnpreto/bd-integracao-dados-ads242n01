@@ -10,7 +10,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
+| Vivian de Seixas Lima | 2421977 | vivianseixas-dev |
 |  |  |  |
 
 ## O cenário
