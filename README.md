@@ -6,10 +6,12 @@
 
 ## Equipe
 
-**Nome da dupla:** ____________________ (deixe em branco se for individual)
+**Nome da dupla:** Eduarda e Leonardo (deixe em branco se for individual)
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
+| Maria Eduarda Almeida Costa | 2411431 | eduardaalmeida-dev |
+| Leonardo Felipe Nascimento Pucu | 2419609 | leozinn71 |
 |  |  |  |
 |  |  |  |
 
