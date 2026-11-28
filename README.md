@@ -6,12 +6,13 @@
 
 ## Equipe
 
-**Nome da dupla:** ____________________ (deixe em branco se for individual)
+**Nome da dupla:**  GreenSync
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| André Rhodis dos Santos| 2422804 | andrerhodis |
+| Dhyon Kennedy Dias dos Santos | 2401115  | dhyonkennedy |
+
 
 ## O cenário
 
