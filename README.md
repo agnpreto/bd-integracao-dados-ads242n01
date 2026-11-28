@@ -10,8 +10,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| Áderson Teixeira | 2423882 | @Diextrait |
 
 ## O cenário
 
