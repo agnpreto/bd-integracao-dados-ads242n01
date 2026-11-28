@@ -10,7 +10,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
+| Márcio Deoclides Marinho da Rocha| 2422490  | marciodeoclides163-netizen |
 |  |  |  |
 
 ## O cenário
