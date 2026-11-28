@@ -6,12 +6,11 @@
 
 ## Equipe
 
-**Nome da dupla:** ____________________ (deixe em branco se for individual)
+**Nome da dupla:** (individual)
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| João Gustavo Gonçalves Vasconcelos | 2408298 | SukitaAM |
 
 ## O cenário
 
