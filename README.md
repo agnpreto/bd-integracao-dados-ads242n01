@@ -10,8 +10,7 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| José Adiel Silva Paz | 2413738 | JoseAdiel-01 |
 
 ## O cenário
 
