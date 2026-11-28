@@ -10,8 +10,8 @@
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| Vitoria de Oliveira Carvalho | 2416734 | VitoriaCar-ind |
+| Geniel Souza de Freitas | 2422670 | GnielSo  |
 
 ## O cenário
 
