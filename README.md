@@ -1,17 +1,17 @@
 # Integração de Dados: implantação, consultas e validação
 
 **Disciplina:** Banco de Dados (ADS242N01)  
-**Trabalho:** individual ou em dupla (à escolha do aluno)  
+**Trabalho:** Dupla  
 **Prazo de entrega:** 24/11/2026
 
 ## Equipe
 
-**Nome da dupla:** ____________________ (deixe em branco se for individual)
+**Nome da dupla:** Franciane Nogueira e John Erik
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| Franciane Nogueira | 2418640 | [@francinogueira0611-ctrl](https://github.com/francinogueira0611-ctrl) |
+| John Erik | 2422168 | [@jaserik](https://github.com/jaserik) |
 
 ## O cenário
 
@@ -22,7 +22,7 @@ Você (ou sua dupla) foi contratado para implantar o banco de dados de uma rede 
 - um script de importação feito por um estagiário, em `scripts/importar.py`;
 - o enunciado completo, em `docs/Atividade_Integracao_de_Dados.pdf`.
 
- **O material contém erros intencionais**, no DDL, nos dados e no script. Encontrar, explicar e corrigir esses erros faz parte da avaliação. Não confie em nada sem testar.
+**O material contém erros intencionais**, no DDL, nos dados e no script. Encontrar, explicar e corrigir esses erros faz parte da avaliação. Não confie em nada sem testar.
 
 Uma entrada de mercadoria se liga ao seu pedido de compra pelo campo `ordem_compra`.
 
@@ -67,7 +67,7 @@ Inclua uma lista de **todos os erros que você encontrou nos dados**, com a cons
 
 ## Estrutura do repositório
 
-```
+```text
 dados/base_teste.xlsx               planilha do cliente (não alterar)
 docs/Atividade_Integracao_de_Dados.pdf
 docs/parte1_importacao.md           Etapa 1: documentação da importação
@@ -90,4 +90,4 @@ sql/04_validacao.sql                Parte 4
 5. **Não coloque senha real** no `importar.py`: use variável de ambiente ou deixe um valor de exemplo.
 6. Para entregar, abra o fork, clique em **Contribute → Open pull request**, preencha o modelo e clique em **Create pull request**. Cada novo `git push` atualiza o mesmo Pull Request até o prazo, **24/11/2026**.
 
- Não edite o repositório do professor, só o fork. Um Pull Request por aluno individual ou por dupla.
+Não edite o repositório do professor, só o fork. Um Pull Request por aluno individual ou por dupla.
