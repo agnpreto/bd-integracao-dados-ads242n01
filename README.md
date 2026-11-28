@@ -6,12 +6,12 @@
 
 ## Equipe
 
-**Nome da dupla:** ____________________ (deixe em branco se for individual)
+**Nome da dupla:** Os Pimposos (deixe em branco se for individual)
 
 | Nome | Matrícula | Usuário do GitHub |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+|  Giovane Lucas Fonseca dias| 2418010  | giovanefonseca |
+| Francisco Kenison da Silva Monteiro | 2415681 | okenison |
 
 ## O cenário
 
